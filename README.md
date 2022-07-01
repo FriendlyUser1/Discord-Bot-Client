@@ -12,11 +12,14 @@ With this application, you will be able to fully control your bot as a user, lik
 
 This application is very unfinished, and is not close to being complete - currently more of a proof of concept. I will keep working on this with more improvements and features to try to let this application run as close to the native Discord client as I can get.
 
+### Recent features
+
+- Infinite scrolling!
+
 ### Immediate To-Do List
 
 - Ability to edit/delete messages
 - Ability to show/send Images/attachments
-- Ability to infinitely scroll up to see past messages
 
 ## Installation
 
