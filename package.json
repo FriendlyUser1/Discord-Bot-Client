@@ -1,0 +1,24 @@
+{
+	"name": "discord-bot-client",
+	"version": "1.0.0",
+	"description": "Discord client for bots",
+	"bugs": {
+		"url": "https://github.com/FriendlyUser1/discord-bot-client/issues"
+	},
+	"license": "MIT",
+	"author": {
+		"name": "FriendlyUser1",
+		"email": "ciirodev335@gmail.com"
+	},
+	"main": "main.js",
+	"scripts": {
+		"start": "electron ."
+	},
+	"devDependencies": {
+		"electron": "^9.1.0"
+	},
+	"dependencies": {
+		"discord.js": "^12.5.3",
+		"lodash": "^4.17.21"
+	}
+}
