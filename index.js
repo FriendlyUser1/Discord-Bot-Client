@@ -62,6 +62,13 @@ addEventListener("load", () => {
 		return content;
 	};
 
+	const newChannel = () => {
+		before = 0;
+		after = 0;
+		loadedMore = 0;
+		document.querySelector("#channel-open .channel-openinner").innerHTML = "";
+	};
+
 	const fetchMessages = async (channel, options) => {
 		// console.log(before);
 		if (options.before === 0) {
@@ -178,7 +185,7 @@ addEventListener("load", () => {
 		}
 	};
 
-	const displayMore = async (channel, id) => {
+	const displayMore = async (channel) => {
 		fetchMessages(channel, { limit: 100, before: before }).then((messages) => {
 			messages = Array.from(messages.values());
 
@@ -202,7 +209,7 @@ addEventListener("load", () => {
 
 			document
 				.querySelector("#channel-open .channel-openinner")
-				.setAttribute("id", "openid-" + id);
+				.setAttribute("id", "openid-" + channel.id);
 
 			// console.log("messages: " + messages.slice(0, 10));
 
@@ -244,7 +251,7 @@ addEventListener("load", () => {
 						)
 						.setAttribute("selected", "");
 
-					var messages = displayMore(channel, id);
+					var messages = displayMore(channel);
 					success({ messages, channel });
 				}
 			}
@@ -288,10 +295,7 @@ addEventListener("load", () => {
 				});
 
 				if (id) {
-					before = 0;
-					loadedMore = 0;
-					document.querySelector("#channel-open .channel-openinner").innerHTML =
-						"";
+					newChannel();
 					readChannel(id).catch(console.error);
 				}
 			});
@@ -333,8 +337,12 @@ addEventListener("load", () => {
 							.getAttribute("id")
 							.replace("openid-", "");
 
-				if (activeDM) displayMessage(message, true);
-				else if (!document.getElementById("channelid-" + id))
+				if (activeDM) {
+					displayMessage(message, true);
+					document
+						.getElementById(`messageid-${message.id}`)
+						.scrollIntoView({ behaviour: "smooth", block: "end" });
+				} else if (!document.getElementById("channelid-" + id))
 					displayChannel(message.channel);
 
 				if (!activeDM || !windowActive) {
@@ -352,7 +360,7 @@ addEventListener("load", () => {
 					}
 
 					let notif = new Notification(
-						message.author.username + "#" + message.author.discriminator,
+						message.guild.member(message.author).displayName,
 						{
 							body: message.content,
 							icon: message.author.displayAvatarURL(),
@@ -363,6 +371,7 @@ addEventListener("load", () => {
 						console.log(activeDM, message.channel.id);
 						if (!activeDM) {
 							Channel = message.channel;
+							newChannel();
 							readChannel(message.channel.id).catch(console.error);
 						}
 					};
@@ -406,7 +415,7 @@ addEventListener("load", () => {
 							.querySelector(".channel-openinner")
 							.id.replace("openid-", "")
 					);
-					if (Channel) displayMore(Channel, Channel.id);
+					if (Channel) displayMore(Channel);
 				}
 			}, 3000)
 		);
