@@ -5,66 +5,66 @@ body {
 	height: 100%;
 }
 
-.dm-icon {
+.channel-icon {
 	width: 25px;
 	height: 25px;
 }
 
-#dm-list {
+#channel-list {
 	width: 150px;
 	height: 100%;
 	flex-shrink: 0;
 	overflow-y: scroll;
 }
-#dm-list .dm-add {
+#channel-list .channel-add {
 	padding-bottom: 15px;
 }
-#dm-list .dm-add input {
+#channel-list .channel-add input {
 	width: 100%;
 }
-#dm-list .dm-item {
+#channel-list .channel-item {
 	word-wrap: break-word;
 	white-space: nowrap;
 	overflow: hidden;
 	word-break: break-word;
 	text-overflow: ellipsis;
 }
-#dm-list .dm-item[selected] {
+#channel-list .channel-item[selected] {
 	background: #eee;
 }
-#dm-list .dm-item .dm-recipientcount {
+#channel-list .channel-item .channel-recipientcount {
 	display: none;
 }
-#dm-list .dm-item.dm-group .dm-recipientcount {
+#channel-list .channel-item.channel-group .channel-recipientcount {
 	display: inline-block;
 }
 
-#dm-open {
+#channel-open {
 	height: 100%;
 	flex-grow: 1;
 	display: flex;
 	flex-direction: column;
 	overflow: hidden;
 }
-#dm-open .dm-openinner {
+#channel-open .channel-openinner {
 	flex-grow: 1;
 	overflow-y: scroll;
 }
-#dm-open .dm-openinner .dm-name::after {
+#channel-open .channel-openinner .channel-name::after {
 	content: "\a";
 	white-space: pre;
 }
-#dm-open .dm-openinner .dm-date {
+#channel-open .channel-openinner .channel-date {
 	display: none;
 }
-#dm-open .dm-openinner .dm-content {
+#channel-open .channel-openinner .channel-content {
 	margin-left: 45px;
 }
-#dm-open .dm-textboxcontain input {
+#channel-open .channel-textboxcontain input {
 	width: 100%;
 }
 
-.dm-newmessage {
+.channel-newmessage {
 	background: #ddd;
 }
 body {
@@ -72,7 +72,7 @@ body {
 	font-family: sans-serif;
 }
 
-.dm-guildtopname {
+.channel-guildtopname {
 	padding: 2vh;
 	border-bottom: 2px solid white;
 	position: sticky;
@@ -89,58 +89,58 @@ input {
 	border: none;
 }
 
-.dm-icon {
+.channel-icon {
 	border-radius: 100%;
 	width: 35px;
 	height: 35px;
 }
 
-#dm-list {
+#channel-list {
 	background: #2c2f33;
 }
-#dm-list .dm-add input {
+#channel-list .channel-add input {
 	background: #23272a;
 	padding: 4px 6px;
 	border-bottom: 1px solid black;
 }
-#dm-list .dm-item {
+#channel-list .channel-item {
 	padding: 10px 5px;
 	display: flex;
 	align-items: center;
 }
-#dm-list .dm-item[selected] {
+#channel-list .channel-item[selected] {
 	background: #23272a;
 }
 
-#dm-open {
+#channel-open {
 	background: #36393f;
 }
-#dm-open .dm-openinner .dm-message {
+#channel-open .channel-openinner .channel-message {
 	display: flex;
 	padding: 7px 14px;
 }
-.dm-text {
+.channel-text {
 	margin-left: 5px;
 }
-#dm-open .dm-openinner .dm-name {
+#channel-open .channel-openinner .channel-name {
 	font-weight: bold;
 	font-size: 12px;
 }
-#dm-open .dm-openinner .dm-content {
+#channel-open .channel-openinner .channel-content {
 	margin-left: 0px;
 	font-size: 16px;
 }
-#dm-open .dm-textboxcontain {
+#channel-open .channel-textboxcontain {
 	display: flex;
 	justify-content: center;
 }
-#dm-open .dm-textboxcontain .textbox {
+#channel-open .channel-textboxcontain .textbox {
 	background: rgba(114, 118, 125, 0.3);
 	margin: 10px;
 	padding: 8px 12px;
 	flex-grow: 1;
 }
 
-.dm-newmessage {
+.channel-newmessage {
 	background: #ddd;
 }

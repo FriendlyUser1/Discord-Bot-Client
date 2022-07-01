@@ -3,7 +3,9 @@ const { ipcRenderer } = require("electron"),
 	client = new Discord.Client(),
 	mentionRegex = /<(@|@!|@&|#)(\d{17,19})>/gi,
 	_ = require("lodash");
-var before = 0;
+var before = 0,
+	after = 0,
+	loadedMore = 0;
 let Channel = null;
 
 addEventListener("load", () => {
@@ -61,7 +63,7 @@ addEventListener("load", () => {
 	};
 
 	const fetchMessages = async (channel, options) => {
-		console.log(before);
+		// console.log(before);
 		if (options.before === 0) {
 			delete options.before;
 		}
@@ -69,7 +71,7 @@ addEventListener("load", () => {
 		return await channel.messages.fetch(options);
 	};
 
-	const displayMessage = (msg) => {
+	const displayMessage = (msg, append) => {
 		let outerDiv = document.createElement("div"),
 			innerImg = document.createElement("img"),
 			innerSpan = document.createElement("span"),
@@ -79,24 +81,24 @@ addEventListener("load", () => {
 			messageSpan = document.createElement("span");
 
 		outerDiv.setAttribute("id", "messageid-" + msg.id);
-		outerDiv.setAttribute("class", "dm-message");
+		outerDiv.setAttribute("class", "channel-message");
 
 		innerImg.setAttribute("src", msg.author.displayAvatarURL());
-		innerImg.setAttribute("class", "dm-icon");
+		innerImg.setAttribute("class", "channel-icon");
 
-		innerSpan.setAttribute("class", "dm-text");
+		innerSpan.setAttribute("class", "channel-text");
 
-		namedateSpan.setAttribute("class", "dm-namedate");
+		namedateSpan.setAttribute("class", "channel-namedate");
 
 		nameSpan.textContent = msg.author.username;
-		nameSpan.setAttribute("class", "dm-name");
+		nameSpan.setAttribute("class", "channel-name");
 		nameSpan.setAttribute("id", "userid-" + msg.author.id);
 
 		dateSpan.textContent = msg.createdTimestamp;
-		dateSpan.setAttribute("class", "dm-date");
+		dateSpan.setAttribute("class", "channel-date");
 
 		messageSpan.textContent = parseMessage(msg);
-		messageSpan.setAttribute("class", "dm-content");
+		messageSpan.setAttribute("class", "channel-content");
 
 		namedateSpan.appendChild(nameSpan);
 		namedateSpan.appendChild(dateSpan);
@@ -107,7 +109,9 @@ addEventListener("load", () => {
 		outerDiv.appendChild(innerImg);
 		outerDiv.appendChild(innerSpan);
 
-		document.getElementById("openid-" + msg.channel.id).append(outerDiv);
+		if (append)
+			document.getElementById("openid-" + msg.channel.id).append(outerDiv);
+		else document.getElementById("openid-" + msg.channel.id).prepend(outerDiv);
 	};
 
 	const displayChannel = (channel) => {
@@ -118,7 +122,7 @@ addEventListener("load", () => {
 				perms.includes("READ_MESSAGE_HISTORY")
 			) {
 				if (!document.querySelector("#channelid-" + channel.id)) {
-					let outterDiv = document.createElement("div"),
+					let outerDiv = document.createElement("div"),
 						innerImg = document.createElement("img"),
 						innerSpan = document.createElement("span"),
 						titleSpan = document.createElement("span"),
@@ -142,30 +146,33 @@ addEventListener("load", () => {
 						};
 					}
 
-					outterDiv.setAttribute("id", "channelid-" + channel.id);
-					outterDiv.setAttribute(
+					outerDiv.setAttribute("id", "channelid-" + channel.id);
+					outerDiv.setAttribute(
 						"class",
-						"dm-item " + (channel.type === "group" ? "dm-group" : "dm-user")
+						"channel-item " +
+							(channel.type === "dm" ? "channel-dm" : "channel-guild")
 					);
 
 					if (info.icon) innerImg.setAttribute("src", info.icon);
-					innerImg.setAttribute("class", "dm-icon");
+					innerImg.setAttribute("class", "channel-icon");
 
-					innerSpan.setAttribute("class", "dm-text");
+					innerSpan.setAttribute("class", "channel-text");
 
 					titleSpan.textContent = info.name;
-					titleSpan.setAttribute("class", "dm-title");
+					titleSpan.setAttribute("class", "channel-title");
 
 					recipientsSpan.textContent = info.length;
-					recipientsSpan.setAttribute("class", "dm-recipientcount");
+					recipientsSpan.setAttribute("class", "channel-recipientcount");
 
 					innerSpan.appendChild(titleSpan);
 					innerSpan.appendChild(recipientsSpan);
 
-					outterDiv.appendChild(innerImg);
-					outterDiv.appendChild(innerSpan);
+					outerDiv.appendChild(innerImg);
+					outerDiv.appendChild(innerSpan);
 
-					document.querySelector("#dm-list .dm-existing").prepend(outterDiv);
+					document
+						.querySelector("#channel-list .channel-existing")
+						.prepend(outerDiv);
 				}
 			}
 		}
@@ -174,32 +181,42 @@ addEventListener("load", () => {
 	const displayMore = async (channel, id) => {
 		fetchMessages(channel, { limit: 100, before: before }).then((messages) => {
 			messages = Array.from(messages.values());
-			var rev = messages.reverse();
 
 			if (messages.length > 0) {
-				before = rev[0].id;
+				if (before != 0) loadedMore++;
+				before = messages[messages.length - 1].id;
+				after = messages[0].id;
 			}
 
 			document
-				.querySelector("#dm-list .dm-existing")
+				.querySelector("#channel-list .channel-existing")
 				.addEventListener("click", (e) => {
 					if (e.target.hasAttribute("class")) {
 						let classes = e.target.getAttribute("class").split(" ");
-						if (classes.includes("dm-newmessage")) {
-							classes.splice(classes.indexOf("dm-newmessage"), 1);
+						if (classes.includes("channel-newmessage")) {
+							classes.splice(classes.indexOf("channel-newmessage"), 1);
 							e.target.setAttribute("class", classes.join(" "));
 						}
 					}
 				});
 
 			document
-				.querySelector("#dm-open .dm-openinner")
+				.querySelector("#channel-open .channel-openinner")
 				.setAttribute("id", "openid-" + id);
-			document.querySelector("#dm-open .dm-openinner").innerHTML = "";
 
-			rev.forEach((msg) => {
-				displayMessage(msg);
+			// console.log("messages: " + messages.slice(0, 10));
+
+			messages.forEach((msg) => {
+				displayMessage(msg, false);
 			});
+			// console.log("after: " + after);
+			// console.log("before: " + before);
+			if (after != 0 && loadedMore === 0) {
+				document
+					.getElementById(`messageid-${after}`)
+					.scrollIntoView({ behaviour: "smooth", block: "end" });
+				console.log("scrolled");
+			}
 
 			// console.log("displayed");
 			return messages;
@@ -222,7 +239,9 @@ addEventListener("load", () => {
 						.querySelectorAll("[selected]")
 						.forEach((s) => s.removeAttribute("selected"));
 					document
-						.querySelector("#dm-list .dm-existing #channelid-" + channel.id)
+						.querySelector(
+							"#channel-list .channel-existing #channelid-" + channel.id
+						)
 						.setAttribute("selected", "");
 
 					var messages = displayMore(channel, id);
@@ -253,15 +272,14 @@ addEventListener("load", () => {
 		});
 
 		document
-			.querySelector("#dm-list .dm-existing")
+			.querySelector("#channel-list .channel-existing")
 			.addEventListener("click", (e) => {
-				//read dm
 				let id = null;
 				e.path.every((path) => {
 					if (path === document.body) return false;
 					else if (
 						path.getAttribute("class") &&
-						path.getAttribute("class").split(" ").includes("dm-item")
+						path.getAttribute("class").split(" ").includes("channel-item")
 					)
 						id = path
 							.getAttribute("id")
@@ -271,44 +289,51 @@ addEventListener("load", () => {
 
 				if (id) {
 					before = 0;
+					loadedMore = 0;
+					document.querySelector("#channel-open .channel-openinner").innerHTML =
+						"";
 					readChannel(id).catch(console.error);
 				}
 			});
 
 		const addUserFromInput = () => {
 			//add user
-			if (document.querySelector("#dm-list .dm-add input").value) {
-				let id = document.querySelector("#dm-list .dm-add input").value;
+			if (document.querySelector("#channel-list .channel-add input").value) {
+				let id = document.querySelector(
+					"#channel-list .channel-add input"
+				).value;
 				if (typeof id === "string") id = client.users.find("tag", id).id;
 				createDM(id).then(displayChannel());
-				document.querySelector("#dm-list .dm-add input").value = "";
+				document.querySelector("#channel-list .channel-add input").value = "";
 			}
 		};
 		document
-			.querySelector("#dm-list .dm-add span")
+			.querySelector("#channel-list .channel-add span")
 			.addEventListener("click", addUserFromInput);
 		document
-			.querySelector("#dm-list .dm-add input")
+			.querySelector("#channel-list .channel-add input")
 			.addEventListener("keypress", (e) => {
 				if (e.code === "Enter") addUserFromInput();
 			});
 
 		client.on("message", (message) => {
 			if (
-				["dm", "group"].includes(message.channel.type) &&
+				["dm", "text", "news"].includes(message.channel.type) &&
 				message.author.id !== client.user.id
 			) {
 				let id = message.channel.id;
 
 				let activeDM =
-					document.querySelector("#dm-open .dm-openinner").hasAttribute("id") &&
+					document
+						.querySelector("#channel-open .channel-openinner")
+						.hasAttribute("id") &&
 					id ===
 						document
-							.querySelector("#dm-open .dm-openinner")
+							.querySelector("#channel-open .channel-openinner")
 							.getAttribute("id")
 							.replace("openid-", "");
 
-				if (activeDM) displayMessage(message, id);
+				if (activeDM) displayMessage(message, true);
 				else if (!document.getElementById("channelid-" + id))
 					displayChannel(message.channel);
 
@@ -320,8 +345,8 @@ addEventListener("load", () => {
 							),
 							classes = DMInList.getAttribute("class");
 						classes = classes.split(" ");
-						if (classes.includes("dm-newmessage")) {
-							classes.push("dm-newmessage");
+						if (classes.includes("channel-newmessage")) {
+							classes.push("channel-newmessage");
 							DMInList.setAttribute("class", classes.join(" "));
 						}
 					}
@@ -346,18 +371,22 @@ addEventListener("load", () => {
 		});
 
 		document
-			.querySelector("#dm-open .dm-textboxcontain input.textbox")
+			.querySelector("#channel-open .channel-textboxcontain input.textbox")
 			.addEventListener("keydown", (e) => {
 				if (
-					document.querySelector("#dm-open .dm-openinner").hasAttribute("id") &&
+					document
+						.querySelector("#channel-open .channel-openinner")
+						.hasAttribute("id") &&
 					e.key === "Enter"
 				) {
 					Channel = client.channels.cache.get(
-						document.querySelector(".dm-openinner").id.replace("openid-", "")
+						document
+							.querySelector(".channel-openinner")
+							.id.replace("openid-", "")
 					);
 					if (Channel) {
 						Channel.send(e.target.value).then((message) => {
-							displayMessage(message);
+							displayMessage(message, true);
 						});
 
 						e.target.value = "";
@@ -366,14 +395,16 @@ addEventListener("load", () => {
 			});
 	};
 
-	let inner = document.querySelector(".dm-openinner");
+	let inner = document.querySelector(".channel-openinner");
 	if (inner) {
 		inner.addEventListener(
 			"scroll",
 			_.throttle((e) => {
-				if (inner.clientHeight < inner.scrollHeight && inner.scrollTop < 200) {
+				if (inner.clientHeight < inner.scrollHeight && inner.scrollTop < 5000) {
 					Channel = client.channels.cache.get(
-						document.querySelector(".dm-openinner").id.replace("openid-", "")
+						document
+							.querySelector(".channel-openinner")
+							.id.replace("openid-", "")
 					);
 					if (Channel) displayMore(Channel, Channel.id);
 				}
