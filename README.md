@@ -32,10 +32,10 @@ You will need to install [`Node.JS`] and make a [bot] for the program to run
 ## Usage
 
 **To open a new DM**
-Get the recipient's Discord ID or Username (with discriminator) and enter it in the text box at the top left, then click "add"
+Get the recipient's Discord ID or Username (with discriminator) and enter it in the text box at the top left of the DM menu, then click "add" or press "enter"
 
 **To Send a message**
-Type your message in the text box at the bottom, then click your "enter"/"return" key
+Type your message in the text box at the bottom, then press "enter" 
 
 [bot]: https://discordjs.guide/preparations/setting-up-a-bot-application.html#your-bot-s-token
 [here]: https://github.com/FriendlyUser1/discord-bot-client/archive/refs/heads/main.zip
