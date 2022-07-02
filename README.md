@@ -38,5 +38,5 @@ Get the recipient's Discord ID or Username (with discriminator) and enter it in 
 Type your message in the text box at the bottom, then click your "enter"/"return" key
 
 [bot]: https://discordjs.guide/preparations/setting-up-a-bot-application.html#your-bot-s-token
-[releases]: https://github.com/FriendlyUser1/discord-bot-client/releases
+[releases]: https://github.com/FriendlyUser1/discord-bot-client/releases/latest
 [node.js]: https://nodejs.org/en/
