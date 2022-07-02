@@ -50,17 +50,20 @@ body {
 .server-icon {
 	width: 45px;
 	height: 45px;
+	padding: 3px;
 }
 .channel-icon,
 .server-icon:hover {
 	cursor: pointer;
 	transition: border-radius 100ms;
-	border-radius: 25%;
+	border-radius: 40%;
 }
 
 #server-list {
 	height: 100%;
 	width: 50px;
+	display: flex;
+	justify-content: center;
 	flex-shrink: 0;
 	overflow-y: scroll;
 	background: var(--background-tertiary);

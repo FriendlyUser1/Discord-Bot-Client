@@ -108,8 +108,6 @@ addEventListener("load", () => {
 			msg.createdAt.getFullYear() == today.getFullYear();
 		if (date) {
 			date = `Today at ${msg.createdAt.toLocaleTimeString().slice(0, -3)}`;
-			console.log(msg.createdAt.toString().slice(0, 15));
-			console.log(new Date(today.getFullYear(), today.getMonth(), 0));
 		} else if (
 			msg.createdAt.getDate() == today.getDate() - 1 &&
 			(msg.createdAt.getMonth() == today.getMonth() ||
@@ -206,6 +204,7 @@ addEventListener("load", () => {
 						let innerImg = document.createElement("img");
 						innerImg.setAttribute("src", info.icon);
 						innerImg.setAttribute("class", "channel-icon");
+						outerDiv.appendChild(innerImg);
 					}
 
 					innerSpan.setAttribute("class", "channel-text");
@@ -215,9 +214,7 @@ addEventListener("load", () => {
 					titleSpan.setAttribute("class", "channel-title");
 
 					innerSpan.appendChild(titleSpan);
-					innerSpan.appendChild(recipientsSpan);
 
-					outerDiv.appendChild(innerImg);
 					outerDiv.appendChild(innerSpan);
 
 					document
@@ -322,14 +319,6 @@ addEventListener("load", () => {
 	const start = () => {
 		console.log("ready");
 
-		// let channelList = client.channels.cache.filter(
-		// 	(c) => ["dm", "text", "news"].includes(c.type)
-		// );
-
-		// channelList.forEach((c) => {
-		// 	displayChannel(c);
-		// });
-
 		let serverList = client.guilds.cache;
 
 		serverList.forEach((s) => {
@@ -337,19 +326,45 @@ addEventListener("load", () => {
 		});
 
 		document
+			.querySelector("#server-list .server-existing")
+			.addEventListener("click", (e) => {
+				let id = null;
+				e.path.forEach((path) => {
+					if (
+						path.id &&
+						path.id.includes("serverid") &&
+						path.id !== "serverid-dm"
+					) {
+						id = path.id.replace("serverid-", "");
+					}
+				});
+
+				if (id) {
+					document.querySelector("#channel-list .channel-existing").innerHTML =
+						"";
+
+					let channelList = client.channels.cache.filter(
+						(c) => ["dm", "text", "news"].includes(c.type) && c.guild.id === id
+					);
+
+					channelList.forEach((c) => {
+						displayChannel(c);
+					});
+				}
+			});
+
+		document
 			.querySelector("#channel-list .channel-existing")
 			.addEventListener("click", (e) => {
 				let id = null;
-				e.path.every((path) => {
-					if (path === document.body) return false;
-					else if (
-						path.getAttribute("class") &&
-						path.getAttribute("class").split(" ").includes("channel-item")
-					)
-						id = path
-							.getAttribute("id")
-							.split(" ")[0]
-							.replace("channelid-", "");
+				e.path.forEach((path) => {
+					if (
+						path.id &&
+						path.id.includes("channelid") &&
+						!path.attributes.getNamedItem("selected")
+					) {
+						id = path.id.replace("channelid-", "");
+					}
 				});
 
 				if (id) {
