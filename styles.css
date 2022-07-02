@@ -1,3 +1,36 @@
+:root {
+	--background-primary: #141414;
+	--background-secondary: #111111;
+	--background-secondary-alt: #292929;
+	--background-tertiary: #0c0c0c;
+	--background-accent: #242424;
+	--background-floating: #111111;
+	--background-modifier-hover: rgba(255, 255, 255, 0.01);
+	--background-modifier-active: rgba(255, 255, 255, 0.03);
+	--background-modifier-selected: rgba(255, 255, 255, 0.04);
+	--background-modifier-accent: hsla(0, 0%, 100%, 0.06);
+	--channeltextarea-background: var(--background-accent);
+	--deprecated-card-bg: rgba(0, 0, 0, 0.2);
+	--deprecated-card-editable-bg: rgba(0, 0, 0, 0.1);
+	--deprecated-text-input-border-disabled: var(--background-tertiary);
+	--activity-card-background: var(--background-primary);
+	--channels-default: #9f9f9f;
+	--background-message-hover: #00000030;
+	--text-muted: #b6b6b6;
+	--text-normal: #fbfbfb;
+	--interactive-normal: #c8c8c8;
+	--interactive-hover: #dcddde;
+	--interactive-active: #fff;
+	--interactive-muted: #747474;
+	--header-secondary: #c9c9c9;
+	--toast-background: var(--background-primary);
+	--toast-header: var(--background-tertiary);
+	--toast-contents: var(--background-secondary);
+	--toast-box-shadow: rgba(0, 0, 0, 0.2);
+	--toast-border: var(--background-tertiary);
+	--offline-color: rgb(60, 60, 60);
+}
+
 body {
 	margin: 0;
 	display: flex;
@@ -5,9 +38,32 @@ body {
 	height: 100%;
 }
 
+.channel-icon,
+.server-icon {
+	transition: border-radius 300ms;
+	border-radius: 100%;
+}
 .channel-icon {
-	width: 25px;
-	height: 25px;
+	width: 35px;
+	height: 35px;
+}
+.server-icon {
+	width: 45px;
+	height: 45px;
+}
+.channel-icon,
+.server-icon:hover {
+	cursor: pointer;
+	transition: border-radius 100ms;
+	border-radius: 25%;
+}
+
+#server-list {
+	height: 100%;
+	width: 50px;
+	flex-shrink: 0;
+	overflow-y: scroll;
+	background: var(--background-tertiary);
 }
 
 #channel-list {
@@ -15,6 +71,7 @@ body {
 	height: 100%;
 	flex-shrink: 0;
 	overflow-y: scroll;
+	background: var(--background-secondary);
 }
 #channel-list .channel-add {
 	padding-bottom: 15px;
@@ -32,9 +89,41 @@ body {
 #channel-list .channel-item[selected] {
 	background: #eee;
 }
-#channel-list .channel-item .channel-recipientcount {
+
+.channel-icon {
+	border-radius: 100%;
+	width: 35px;
+	height: 35px;
+}
+
+#channel-list::-webkit-scrollbar,
+#server-list::-webkit-scrollbar {
 	display: none;
 }
+#channel-list .channel-add input {
+	background: #23272a;
+	padding: 4px 6px;
+	border-bottom: 1px solid black;
+}
+#channel-list .channel-item {
+	padding: 10px 5px;
+	display: flex;
+	align-items: center;
+}
+#channel-list .channel-item[selected] {
+	background: #23272a;
+}
+
+.channel-newmessage {
+	background: #ddd;
+}
+
+.channel-date {
+	color: var(--text-muted);
+	font-size: 0.75rem;
+	line-height: 1.375rem;
+}
+
 #channel-list .channel-item.channel-group .channel-recipientcount {
 	display: inline-block;
 }
@@ -46,27 +135,72 @@ body {
 	flex-direction: column;
 	overflow: hidden;
 }
+
 #channel-open .channel-openinner {
 	flex-grow: 1;
 	overflow-y: scroll;
+	overflow-x: hidden;
 }
-#channel-open .channel-openinner .channel-name::after {
-	content: "\a";
-	white-space: pre;
-}
-#channel-open .channel-openinner .channel-date {
+
+/* 
+#channel-open .channel-openinner::-webkit-scrollbar::horizontal {
 	display: none;
-}
-#channel-open .channel-openinner .channel-content {
-	margin-left: 45px;
-}
+} */
+
 #channel-open .channel-textboxcontain input {
 	width: 100%;
+}
+
+#channel-open {
+	background: var(--background-primary);
+}
+#channel-open .channel-openinner .channel-message {
+	display: flex;
+	padding: 7px 14px;
+}
+.channel-text {
+	margin-left: 5px;
+}
+
+#channel-open .channel-openinner .channel-name {
+	font-weight: 500;
+	font-size: 1rem;
+	line-height: 1.375rem;
+}
+
+#channel-open .channel-openinner .channel-name::after {
+	content: "\a";
+	/* display: inline; */
+	/* white-space: pre; */
+}
+
+#channel-open .channel-openinner .channel-date::after {
+	content: "\a";
+	display: inline;
+	white-space: pre;
+}
+
+#channel-open .channel-openinner .channel-content {
+	margin-left: 0px;
+	font-size: 16px;
+	overflow-wrap: break-word;
+}
+#channel-open .channel-textboxcontain {
+	display: flex;
+	justify-content: center;
+}
+#channel-open .channel-textboxcontain .textbox {
+	background: var(--background-accent);
+	border-radius: 8px;
+	margin: 10px;
+	padding: 8px 12px;
+	flex-grow: 1;
 }
 
 .channel-newmessage {
 	background: #ddd;
 }
+
 body {
 	color: white;
 	font-family: sans-serif;
@@ -89,58 +223,29 @@ input {
 	border: none;
 }
 
-.channel-icon {
-	border-radius: 100%;
-	width: 35px;
-	height: 35px;
+/* Tooltip container */
+.tooltip {
+	position: relative;
+	display: inline-block;
+	border-bottom: 1px dotted black; /* If you want dots under the hoverable text */
 }
 
-#channel-list {
-	background: #2c2f33;
-}
-#channel-list .channel-add input {
-	background: #23272a;
-	padding: 4px 6px;
-	border-bottom: 1px solid black;
-}
-#channel-list .channel-item {
-	padding: 10px 5px;
-	display: flex;
-	align-items: center;
-}
-#channel-list .channel-item[selected] {
-	background: #23272a;
+/* Tooltip text */
+.tooltip .tooltiptext {
+	visibility: hidden;
+	width: 120px;
+	background-color: black;
+	color: #fff;
+	text-align: center;
+	padding: 5px 0;
+	border-radius: 6px;
+
+	/* Position the tooltip text - see examples below! */
+	position: absolute;
+	z-index: 1;
 }
 
-#channel-open {
-	background: #36393f;
-}
-#channel-open .channel-openinner .channel-message {
-	display: flex;
-	padding: 7px 14px;
-}
-.channel-text {
-	margin-left: 5px;
-}
-#channel-open .channel-openinner .channel-name {
-	font-weight: bold;
-	font-size: 12px;
-}
-#channel-open .channel-openinner .channel-content {
-	margin-left: 0px;
-	font-size: 16px;
-}
-#channel-open .channel-textboxcontain {
-	display: flex;
-	justify-content: center;
-}
-#channel-open .channel-textboxcontain .textbox {
-	background: rgba(114, 118, 125, 0.3);
-	margin: 10px;
-	padding: 8px 12px;
-	flex-grow: 1;
-}
-
-.channel-newmessage {
-	background: #ddd;
+/* Show the tooltip text when you mouse over the tooltip container */
+.tooltip:hover .tooltiptext {
+	visibility: visible;
 }

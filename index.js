@@ -101,7 +101,27 @@ addEventListener("load", () => {
 		nameSpan.setAttribute("class", "channel-name");
 		nameSpan.setAttribute("id", "userid-" + msg.author.id);
 
-		dateSpan.textContent = msg.createdTimestamp;
+		let today = new Date();
+		let date =
+			msg.createdAt.getDate() == today.getDate() &&
+			msg.createdAt.getMonth() == today.getMonth() &&
+			msg.createdAt.getFullYear() == today.getFullYear();
+		if (date) {
+			date = `Today at ${msg.createdAt.toLocaleTimeString().slice(0, -3)}`;
+			console.log(msg.createdAt.toString().slice(0, 15));
+			console.log(new Date(today.getFullYear(), today.getMonth(), 0));
+		} else if (
+			msg.createdAt.getDate() == today.getDate() - 1 &&
+			(msg.createdAt.getMonth() == today.getMonth() ||
+				msg.createdAt.toString().slice(0, 15) ==
+					new Date(today.getFullYear(), today.getMonth(), 0)
+						.toString()
+						.slice(0, 15))
+		)
+			date = `Yesterday at ${msg.createdAt.toLocaleTimeString().slice(0, -3)}`;
+		else date = msg.createdAt.toLocaleDateString();
+
+		dateSpan.textContent = date;
 		dateSpan.setAttribute("class", "channel-date");
 
 		messageSpan.textContent = parseMessage(msg);
@@ -109,7 +129,6 @@ addEventListener("load", () => {
 
 		namedateSpan.appendChild(nameSpan);
 		namedateSpan.appendChild(dateSpan);
-
 		innerSpan.appendChild(namedateSpan);
 		innerSpan.appendChild(messageSpan);
 
@@ -121,6 +140,36 @@ addEventListener("load", () => {
 		else document.getElementById("openid-" + msg.channel.id).prepend(outerDiv);
 	};
 
+	const displayServer = (guild) => {
+		if (!document.querySelector("#serverid-" + guild.id)) {
+			let outerDiv = document.createElement("div"),
+				innerImg = document.createElement("img"),
+				tooltip = document.createElement("div"),
+				tooltipspan = document.createElement("span");
+
+			let info = {
+				name: guild.name,
+				icon: guild.icon
+					? guild.iconURL()
+					: `https://textoverimage.moesif.com/image?image_url=https://github.com/FriendlyUser1/apis/blob/364c4bd2f4458af085752af557c1ea5837b95baa/dbcguild.png?raw=true&text=${guild.nameAcronym}&x_align=center&y_align=middle&text_size=128`,
+			};
+
+			tooltip.className = "tooltip";
+			tooltipspan.className = "tooltiptext";
+			tooltipspan.textContent = info.name;
+			tooltip.append(tooltipspan);
+
+			innerImg.setAttribute("src", info.icon);
+			innerImg.className = "server-icon";
+
+			outerDiv.id = `serverid-${guild.id}`;
+			outerDiv.className = "server-item";
+			outerDiv.append(innerImg);
+
+			document.querySelector(".server-existing").append(outerDiv);
+		}
+	};
+
 	const displayChannel = (channel) => {
 		if (channel) {
 			let perms = channel.permissionsFor(client.user).toArray();
@@ -130,10 +179,8 @@ addEventListener("load", () => {
 			) {
 				if (!document.querySelector("#channelid-" + channel.id)) {
 					let outerDiv = document.createElement("div"),
-						innerImg = document.createElement("img"),
 						innerSpan = document.createElement("span"),
-						titleSpan = document.createElement("span"),
-						recipientsSpan = document.createElement("span");
+						titleSpan = document.createElement("span");
 
 					let info = {};
 
@@ -141,15 +188,10 @@ addEventListener("load", () => {
 						info = {
 							icon: channel.recipient.avatarURL(),
 							name: channel.recipient.username,
-							length: 1,
 						};
 					else {
 						info = {
-							icon: channel.guild.icon
-								? channel.guild.iconURL()
-								: `https://textoverimage.moesif.com/image?image_url=https://raw.githubusercontent.com/FriendlyUser1/apis/3c101df160908315c27a9143a0653dbe23edfe53/Untitled.png&text=${channel.guild.nameAcronym}&x_align=center&y_align=middle&text_size=128`,
 							name: channel.name,
-							length: channel.members.length,
 						};
 					}
 
@@ -160,16 +202,17 @@ addEventListener("load", () => {
 							(channel.type === "dm" ? "channel-dm" : "channel-guild")
 					);
 
-					if (info.icon) innerImg.setAttribute("src", info.icon);
-					innerImg.setAttribute("class", "channel-icon");
+					if (info.icon) {
+						let innerImg = document.createElement("img");
+						innerImg.setAttribute("src", info.icon);
+						innerImg.setAttribute("class", "channel-icon");
+					}
 
 					innerSpan.setAttribute("class", "channel-text");
 
-					titleSpan.textContent = info.name;
+					titleSpan.textContent =
+						(channel.type === "dm" ? "@" : "#") + info.name;
 					titleSpan.setAttribute("class", "channel-title");
-
-					recipientsSpan.textContent = info.length;
-					recipientsSpan.setAttribute("class", "channel-recipientcount");
 
 					innerSpan.appendChild(titleSpan);
 					innerSpan.appendChild(recipientsSpan);
@@ -243,6 +286,16 @@ addEventListener("load", () => {
 						? channel.recipient.username
 						: channel.name;
 					document
+						.querySelector(".channel-textboxcontain .textbox")
+						.setAttribute(
+							"placeholder",
+							`Message ${
+								channel.recipient
+									? "@" + channel.recipient.username
+									: "#" + channel.name
+							}`
+						);
+					document
 						.querySelectorAll("[selected]")
 						.forEach((s) => s.removeAttribute("selected"));
 					document
@@ -269,13 +322,18 @@ addEventListener("load", () => {
 	const start = () => {
 		console.log("ready");
 
-		let channelList = client.channels.cache.filter(
-			(c) => ["dm", "text", "news"].includes(c.type)
-			// console.log(c.name);
-		);
+		// let channelList = client.channels.cache.filter(
+		// 	(c) => ["dm", "text", "news"].includes(c.type)
+		// );
 
-		channelList.forEach((c) => {
-			displayChannel(c);
+		// channelList.forEach((c) => {
+		// 	displayChannel(c);
+		// });
+
+		let serverList = client.guilds.cache;
+
+		serverList.forEach((s) => {
+			displayServer(s);
 		});
 
 		document
