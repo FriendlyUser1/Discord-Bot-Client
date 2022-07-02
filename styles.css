@@ -72,7 +72,7 @@ body {
 }
 
 #channel-list {
-	width: 150px;
+	width: 160px;
 	height: 100%;
 	flex-shrink: 0;
 	overflow-y: scroll;
@@ -122,9 +122,13 @@ body {
 }
 
 #channel-list .channel-add button:hover {
-	transition: background-color 0.3s;
+	transition: background-color 0.2s;
 	background-color: var(--background-secondary-alt);
 	color: white;
+}
+
+#channel-list .channel-add button:active {
+	background-color: var(--background-primary);
 }
 
 #channel-list .channel-item {
@@ -177,6 +181,10 @@ body {
 }
 .channel-text {
 	margin-left: 5px;
+}
+
+.channel-dm {
+	font-size: 14px;
 }
 
 #channel-open .channel-openinner .channel-name {

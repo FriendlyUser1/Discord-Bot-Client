@@ -31,6 +31,7 @@ function mainApp(token) {
 			height: 800,
 			minWidth: 760,
 			minHeight: 200,
+			icon: __dirname + "/res/icon.png",
 			webPreferences: {
 				nodeIntegration: true,
 				contextIsolation: false,

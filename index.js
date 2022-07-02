@@ -85,7 +85,6 @@ addEventListener("load", () => {
 	};
 
 	const fetchMessages = async (channel, options) => {
-		// console.log(before);
 		if (options.before === 0) {
 			delete options.before;
 		}
@@ -179,10 +178,14 @@ addEventListener("load", () => {
 
 	const displayChannel = (channel) => {
 		if (channel) {
-			let perms = channel.permissionsFor(client.user).toArray();
+			let perms;
+			if (channel.type !== "dm")
+				perms = channel.permissionsFor(client.user).toArray();
+			else perms = [];
 			if (
-				perms.includes("VIEW_CHANNEL") &&
-				perms.includes("READ_MESSAGE_HISTORY")
+				channel.type === "dm" ||
+				(perms.includes("VIEW_CHANNEL") &&
+					perms.includes("READ_MESSAGE_HISTORY"))
 			) {
 				if (!document.querySelector("#channelid-" + channel.id)) {
 					let outerDiv = document.createElement("div"),
@@ -267,7 +270,6 @@ addEventListener("load", () => {
 				document
 					.getElementById(`messageid-${after}`)
 					.scrollIntoView({ behaviour: "smooth", block: "end" });
-				console.log("scrolled");
 			}
 			return messages;
 		});
@@ -277,10 +279,14 @@ addEventListener("load", () => {
 		return new Promise(function (success, fail) {
 			let channel = client.channels.cache.get(id);
 			if (channel) {
-				let perms = channel.permissionsFor(client.user).toArray();
+				let perms;
+				if (channel.type !== "dm")
+					perms = channel.permissionsFor(client.user).toArray();
+				else perms = [];
 				if (
-					perms.includes("VIEW_CHANNEL") &&
-					perms.includes("READ_MESSAGE_HISTORY")
+					channel.type === "dm" ||
+					(perms.includes("VIEW_CHANNEL") &&
+						perms.includes("READ_MESSAGE_HISTORY"))
 				) {
 					document.querySelector(".channel-name").innerHTML = channel.recipient
 						? channel.recipient.username
@@ -357,7 +363,7 @@ addEventListener("load", () => {
 								ndmbut.textContent = "Add";
 								ndmdiv.append(ndminp);
 								ndmdiv.append(ndmbut);
-								document.querySelector("#channel-list").append(ndmdiv);
+								document.querySelector("#channel-list").prepend(ndmdiv);
 							}
 
 							document
@@ -383,7 +389,7 @@ addEventListener("load", () => {
 					Guild = client.guilds.cache.get(id);
 
 					let channelList = client.channels.cache.filter(
-						(c) => ["dm", "text", "news"].includes(c.type) && c.guild.id === id
+						(c) => ["text", "news"].includes(c.type) && c.guild.id === id
 					);
 
 					channelList.forEach((c) => {
@@ -433,7 +439,16 @@ addEventListener("load", () => {
 						.fetch(id)
 						.then((user) => {
 							if (user) {
-								createDM(user.id).then((c) => displayChannel(c));
+								createDM(user.id)
+									.then((c) => {
+										if (!document.querySelector(`.channelid-${c.id}`))
+											displayChannel(c);
+									})
+									.catch((e) => {
+										document
+											.querySelector("#channel-list .channel-add input")
+											.setAttribute("class", "error");
+									});
 								document.querySelector(
 									"#channel-list .channel-add input"
 								).value = "";
@@ -450,7 +465,7 @@ addEventListener("load", () => {
 
 		client.on("message", (message) => {
 			if (
-				["dm", "text", "news"].includes(message.channel.type) &&
+				["text", "news"].includes(message.channel.type) &&
 				message.author.id !== client.user.id
 			) {
 				let id = message.channel.id;
@@ -475,7 +490,6 @@ addEventListener("load", () => {
 
 				if (!activeChannel || !windowActive) {
 					if (!activeChannel) {
-						console.log("channelid-" + message.author.id);
 						let ChannelInList = document.getElementById(
 								"channelid-" + message.channel.id
 							),
@@ -496,7 +510,6 @@ addEventListener("load", () => {
 					);
 
 					notif.onclick = () => {
-						console.log(activeChannel, message.channel.id);
 						if (!activeChannel) {
 							Channel = message.channel;
 							newChannel();
