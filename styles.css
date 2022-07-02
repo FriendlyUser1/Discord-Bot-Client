@@ -36,6 +36,8 @@ body {
 	display: flex;
 	flex-direction: row;
 	height: 100%;
+	font-family: sans-serif;
+	color: white;
 }
 
 .channel-icon,
@@ -76,12 +78,6 @@ body {
 	overflow-y: scroll;
 	background: var(--background-secondary);
 }
-#channel-list .channel-add {
-	padding-bottom: 15px;
-}
-#channel-list .channel-add input {
-	width: 100%;
-}
 #channel-list .channel-item {
 	word-wrap: break-word;
 	white-space: nowrap;
@@ -103,11 +99,34 @@ body {
 #server-list::-webkit-scrollbar {
 	display: none;
 }
+.error {
+	border: 1px solid red !important;
+}
+
+#channel-list .channel-add {
+	padding-bottom: 15px;
+	display: flex;
+}
 #channel-list .channel-add input {
+	width: 100%;
 	background: #23272a;
 	padding: 4px 6px;
 	border-bottom: 1px solid black;
 }
+
+#channel-list .channel-add button {
+	border: 0.5px solid black;
+	outline: none;
+	background-color: var(--background-tertiary);
+	color: white;
+}
+
+#channel-list .channel-add button:hover {
+	transition: background-color 0.3s;
+	background-color: var(--background-secondary-alt);
+	color: white;
+}
+
 #channel-list .channel-item {
 	padding: 10px 5px;
 	display: flex;
@@ -144,11 +163,6 @@ body {
 	overflow-y: scroll;
 	overflow-x: hidden;
 }
-
-/* 
-#channel-open .channel-openinner::-webkit-scrollbar::horizontal {
-	display: none;
-} */
 
 #channel-open .channel-textboxcontain input {
 	width: 100%;
@@ -193,20 +207,12 @@ body {
 	justify-content: center;
 }
 #channel-open .channel-textboxcontain .textbox {
+	color: white;
 	background: var(--background-accent);
 	border-radius: 8px;
 	margin: 10px;
 	padding: 8px 12px;
 	flex-grow: 1;
-}
-
-.channel-newmessage {
-	background: #ddd;
-}
-
-body {
-	color: white;
-	font-family: sans-serif;
 }
 
 .channel-guildtopname {
@@ -224,31 +230,4 @@ button {
 input {
 	color: white;
 	border: none;
-}
-
-/* Tooltip container */
-.tooltip {
-	position: relative;
-	display: inline-block;
-	border-bottom: 1px dotted black; /* If you want dots under the hoverable text */
-}
-
-/* Tooltip text */
-.tooltip .tooltiptext {
-	visibility: hidden;
-	width: 120px;
-	background-color: black;
-	color: #fff;
-	text-align: center;
-	padding: 5px 0;
-	border-radius: 6px;
-
-	/* Position the tooltip text - see examples below! */
-	position: absolute;
-	z-index: 1;
-}
-
-/* Show the tooltip text when you mouse over the tooltip container */
-.tooltip:hover .tooltiptext {
-	visibility: visible;
 }

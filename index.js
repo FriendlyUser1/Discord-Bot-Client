@@ -6,7 +6,8 @@ const { ipcRenderer } = require("electron"),
 var before = 0,
 	after = 0,
 	loadedMore = 0;
-let Channel = null;
+let Channel = {},
+	Guild = {};
 
 addEventListener("load", () => {
 	let windowActive = document.hidden;
@@ -67,6 +68,20 @@ addEventListener("load", () => {
 		after = 0;
 		loadedMore = 0;
 		document.querySelector("#channel-open .channel-openinner").innerHTML = "";
+	};
+
+	const clearChannel = () => {
+		document.querySelector("#channel-list .channel-existing").innerHTML = "";
+		document.querySelector(".channel-guildtopname .channel-name").innerHTML =
+			"";
+		let oi = document.querySelector(".channel-openinner");
+		oi.id = "";
+		oi.innerHTML = "";
+
+		let textbox = document.querySelector(".channel-textboxcontain .textbox");
+
+		if (textbox.hasAttribute("placeholder"))
+			textbox.removeAttribute("placeholder");
 	};
 
 	const fetchMessages = async (channel, options) => {
@@ -141,9 +156,7 @@ addEventListener("load", () => {
 	const displayServer = (guild) => {
 		if (!document.querySelector("#serverid-" + guild.id)) {
 			let outerDiv = document.createElement("div"),
-				innerImg = document.createElement("img"),
-				tooltip = document.createElement("div"),
-				tooltipspan = document.createElement("span");
+				innerImg = document.createElement("img");
 
 			let info = {
 				name: guild.name,
@@ -152,12 +165,8 @@ addEventListener("load", () => {
 					: `https://textoverimage.moesif.com/image?image_url=https://github.com/FriendlyUser1/apis/blob/364c4bd2f4458af085752af557c1ea5837b95baa/dbcguild.png?raw=true&text=${guild.nameAcronym}&x_align=center&y_align=middle&text_size=128`,
 			};
 
-			tooltip.className = "tooltip";
-			tooltipspan.className = "tooltiptext";
-			tooltipspan.textContent = info.name;
-			tooltip.append(tooltipspan);
-
 			innerImg.setAttribute("src", info.icon);
+			innerImg.setAttribute("title", info.name);
 			innerImg.className = "server-icon";
 
 			outerDiv.id = `serverid-${guild.id}`;
@@ -251,21 +260,15 @@ addEventListener("load", () => {
 				.querySelector("#channel-open .channel-openinner")
 				.setAttribute("id", "openid-" + channel.id);
 
-			// console.log("messages: " + messages.slice(0, 10));
-
 			messages.forEach((msg) => {
 				displayMessage(msg, false);
 			});
-			// console.log("after: " + after);
-			// console.log("before: " + before);
 			if (after != 0 && loadedMore === 0) {
 				document
 					.getElementById(`messageid-${after}`)
 					.scrollIntoView({ behaviour: "smooth", block: "end" });
 				console.log("scrolled");
 			}
-
-			// console.log("displayed");
 			return messages;
 		});
 	};
@@ -330,18 +333,54 @@ addEventListener("load", () => {
 			.addEventListener("click", (e) => {
 				let id = null;
 				e.path.forEach((path) => {
-					if (
-						path.id &&
-						path.id.includes("serverid") &&
-						path.id !== "serverid-dm"
-					) {
-						id = path.id.replace("serverid-", "");
+					if (path.id && path.id.includes("serverid")) {
+						Channel = {};
+						if (path.id === "serverid-dm") {
+							clearChannel();
+
+							Guild = {};
+
+							let chans = document.querySelector(
+								"#channel-list .channel-existing"
+							);
+
+							while (chans.firstChild) {
+								chans.removeChild(chans.lastChild);
+							}
+
+							if (!document.querySelector("#channel-list .channel-add")) {
+								let ndmdiv = document.createElement("div");
+								ndmdiv.className = "channel-add";
+								ndmdiv.setAttribute("placeholder", "ID of User");
+								let ndminp = document.createElement("input");
+								let ndmbut = document.createElement("button");
+								ndmbut.textContent = "Add";
+								ndmdiv.append(ndminp);
+								ndmdiv.append(ndmbut);
+								document.querySelector("#channel-list").append(ndmdiv);
+							}
+
+							document
+								.querySelector("#channel-list .channel-add button")
+								.addEventListener("click", () => addUserFromInput());
+
+							document
+								.querySelector("#channel-list .channel-add input")
+								.addEventListener("keypress", (e) => {
+									if (e.code === "Enter") addUserFromInput();
+								});
+						} else {
+							id = path.id.replace("serverid-", "");
+							let addDm = document.querySelector("#channel-list .channel-add");
+							if (addDm) addDm.remove();
+						}
 					}
 				});
 
-				if (id) {
-					document.querySelector("#channel-list .channel-existing").innerHTML =
-						"";
+				if (id && id != Guild.id) {
+					clearChannel();
+
+					Guild = client.guilds.cache.get(id);
 
 					let channelList = client.channels.cache.filter(
 						(c) => ["dm", "text", "news"].includes(c.type) && c.guild.id === id
@@ -367,31 +406,47 @@ addEventListener("load", () => {
 					}
 				});
 
-				if (id) {
+				if (id && id != Channel.id) {
+					Channel = client.channels.cache.get(id) || {};
 					newChannel();
 					readChannel(id).catch(console.error);
 				}
 			});
 
 		const addUserFromInput = () => {
-			//add user
 			if (document.querySelector("#channel-list .channel-add input").value) {
+				if (
+					document
+						.querySelector("#channel-list .channel-add input")
+						.getAttribute("class")
+				) {
+					document
+						.querySelector("#channel-list .channel-add input")
+						.removeAttribute("class");
+				}
+
 				let id = document.querySelector(
 					"#channel-list .channel-add input"
 				).value;
-				if (typeof id === "string") id = client.users.find("tag", id).id;
-				createDM(id).then(displayChannel());
-				document.querySelector("#channel-list .channel-add input").value = "";
+				if (id != "" && parseInt(id) && id.length === 18) {
+					user = client.users
+						.fetch(id)
+						.then((user) => {
+							if (user) {
+								createDM(user.id).then((c) => displayChannel(c));
+								document.querySelector(
+									"#channel-list .channel-add input"
+								).value = "";
+							}
+						})
+						.catch((e) => {
+							document
+								.querySelector("#channel-list .channel-add input")
+								.setAttribute("class", "error");
+						});
+				}
 			}
 		};
-		document
-			.querySelector("#channel-list .channel-add span")
-			.addEventListener("click", addUserFromInput);
-		document
-			.querySelector("#channel-list .channel-add input")
-			.addEventListener("keypress", (e) => {
-				if (e.code === "Enter") addUserFromInput();
-			});
 
 		client.on("message", (message) => {
 			if (
@@ -400,7 +455,7 @@ addEventListener("load", () => {
 			) {
 				let id = message.channel.id;
 
-				let activeDM =
+				let activeChannel =
 					document
 						.querySelector("#channel-open .channel-openinner")
 						.hasAttribute("id") &&
@@ -410,7 +465,7 @@ addEventListener("load", () => {
 							.getAttribute("id")
 							.replace("openid-", "");
 
-				if (activeDM) {
+				if (activeChannel) {
 					displayMessage(message, true);
 					document
 						.getElementById(`messageid-${message.id}`)
@@ -418,17 +473,17 @@ addEventListener("load", () => {
 				} else if (!document.getElementById("channelid-" + id))
 					displayChannel(message.channel);
 
-				if (!activeDM || !windowActive) {
-					if (!activeDM) {
+				if (!activeChannel || !windowActive) {
+					if (!activeChannel) {
 						console.log("channelid-" + message.author.id);
-						let DMInList = document.getElementById(
+						let ChannelInList = document.getElementById(
 								"channelid-" + message.channel.id
 							),
-							classes = DMInList.getAttribute("class");
+							classes = ChannelInList.getAttribute("class");
 						classes = classes.split(" ");
 						if (classes.includes("channel-newmessage")) {
 							classes.push("channel-newmessage");
-							DMInList.setAttribute("class", classes.join(" "));
+							ChannelInList.setAttribute("class", classes.join(" "));
 						}
 					}
 
@@ -441,8 +496,8 @@ addEventListener("load", () => {
 					);
 
 					notif.onclick = () => {
-						console.log(activeDM, message.channel.id);
-						if (!activeDM) {
+						console.log(activeChannel, message.channel.id);
+						if (!activeChannel) {
 							Channel = message.channel;
 							newChannel();
 							readChannel(message.channel.id).catch(console.error);
@@ -452,6 +507,7 @@ addEventListener("load", () => {
 			}
 		});
 
+		// Send and display message
 		document
 			.querySelector("#channel-open .channel-textboxcontain input.textbox")
 			.addEventListener("keydown", (e) => {
@@ -477,6 +533,7 @@ addEventListener("load", () => {
 			});
 	};
 
+	// Infinite scroll
 	let inner = document.querySelector(".channel-openinner");
 	if (inner) {
 		inner.addEventListener(
