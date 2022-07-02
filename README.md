@@ -25,7 +25,7 @@ This application is very unfinished, and is not close to being complete - curren
 
 You will need to install [`Node.JS`] and make a [bot] for the program to run
 
-1. Download zip from [releases] and extract it into a folder
+1. Download zip [here] and extract it into a folder
 2. Create a text file called `token.txt` in the folder and type your bot's token in it
 3. Run `start.bat` to compile and run the program
 
@@ -38,5 +38,5 @@ Get the recipient's Discord ID or Username (with discriminator) and enter it in 
 Type your message in the text box at the bottom, then click your "enter"/"return" key
 
 [bot]: https://discordjs.guide/preparations/setting-up-a-bot-application.html#your-bot-s-token
-[releases]: https://github.com/FriendlyUser1/discord-bot-client/releases/latest
+[here]: https://github.com/FriendlyUser1/discord-bot-client/archive/refs/heads/main.zip
 [node.js]: https://nodejs.org/en/
