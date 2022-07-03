@@ -7,7 +7,8 @@ var before = 0,
 	after = 0,
 	loadedMore = 0;
 let Channel = {},
-	Guild = {};
+	Guild = {},
+	notifChannels = [];
 
 addEventListener("load", () => {
 	let windowActive = document.hidden;
@@ -68,6 +69,16 @@ addEventListener("load", () => {
 		after = 0;
 		loadedMore = 0;
 		document.querySelector("#channel-open .channel-openinner").innerHTML = "";
+	};
+
+	const handleChannelNotif = (channelInList, remove) => {
+		let classes = channelInList.classList;
+
+		if (remove && Array.from(classes).includes("channel-newmessage"))
+			classes.remove("channel-newmessage");
+
+		if (!remove && !Array.from(classes).includes("channel-newmessage"))
+			classes.add("channel-newmessage");
 	};
 
 	const clearChannel = () => {
@@ -209,7 +220,8 @@ addEventListener("load", () => {
 					outerDiv.setAttribute(
 						"class",
 						"channel-item " +
-							(channel.type === "dm" ? "channel-dm" : "channel-guild")
+							(channel.type === "dm" ? "channel-dm" : "channel-guild") +
+							(notifChannels.includes(channel.id) ? " channel-newmessage" : "")
 					);
 
 					if (info.icon) {
@@ -250,12 +262,14 @@ addEventListener("load", () => {
 			document
 				.querySelector("#channel-list .channel-existing")
 				.addEventListener("click", (e) => {
-					if (e.target.hasAttribute("class")) {
-						let classes = e.target.getAttribute("class").split(" ");
-						if (classes.includes("channel-newmessage")) {
-							classes.splice(classes.indexOf("channel-newmessage"), 1);
-							e.target.setAttribute("class", classes.join(" "));
-						}
+					if (
+						e.target.hasAttribute("class") &&
+						Array.from(e.target.classList).includes("channel-item")
+					) {
+						handleChannelNotif(e.target, true);
+						notifChannels.splice(
+							notifChannels.indexOf(e.target.id.replace("channelid-", ""), 1)
+						);
 					}
 				});
 
@@ -413,6 +427,14 @@ addEventListener("load", () => {
 				});
 
 				if (id && id != Channel.id) {
+					if (notifChannels.includes(id)) {
+						notifChannels.splice(notifChannels.indexOf(id), 1);
+						handleChannelNotif(
+							document.getElementById(`channelid-${id}`),
+							true
+						);
+					}
+
 					Channel = client.channels.cache.get(id) || {};
 					newChannel();
 					readChannel(id).catch(console.error);
@@ -464,11 +486,10 @@ addEventListener("load", () => {
 		};
 
 		client.on("message", (message) => {
-			if (
-				["text", "news"].includes(message.channel.type) &&
-				message.author.id !== client.user.id
-			) {
+			if (["text", "news"].includes(message.channel.type)) {
 				let id = message.channel.id;
+				if (message.author.id !== client.user.id && !notifChannels.includes(id))
+					notifChannels.push(id);
 
 				let activeChannel =
 					document
@@ -485,24 +506,27 @@ addEventListener("load", () => {
 					document
 						.getElementById(`messageid-${message.id}`)
 						.scrollIntoView({ behaviour: "smooth", block: "end" });
-				} else if (!document.getElementById("channelid-" + id))
+				} else if (
+					!document.getElementById("channelid-" + id) &&
+					Guild === message.channel.guild
+				)
 					displayChannel(message.channel);
 
-				if (!activeChannel || !windowActive) {
-					if (!activeChannel) {
-						let ChannelInList = document.getElementById(
-								"channelid-" + message.channel.id
-							),
-							classes = ChannelInList.getAttribute("class");
-						classes = classes.split(" ");
-						if (classes.includes("channel-newmessage")) {
-							classes.push("channel-newmessage");
-							ChannelInList.setAttribute("class", classes.join(" "));
-						}
+				if (
+					(!activeChannel || !windowActive) &&
+					message.author.id !== client.user.id
+				) {
+					if (!activeChannel && Guild === message.channel.guild) {
+						handleChannelNotif(
+							document.getElementById(`channelid-${message.channel.id}`),
+							false
+						);
 					}
 
 					let notif = new Notification(
-						message.guild.member(message.author).displayName,
+						`${message.guild.member(message.author).displayName} (#${
+							message.channel.name
+						}, ${message.guild.name})`,
 						{
 							body: message.content,
 							icon: message.author.displayAvatarURL(),
@@ -512,8 +536,28 @@ addEventListener("load", () => {
 					notif.onclick = () => {
 						if (!activeChannel) {
 							Channel = message.channel;
+							Guild = message.channel.guild;
 							newChannel();
-							readChannel(message.channel.id).catch(console.error);
+							let channelList = client.channels.cache.filter(
+								(c) =>
+									["text", "news"].includes(c.type) && c.guild.id === Guild.id
+							);
+
+							channelList.forEach((c) => {
+								displayChannel(c);
+							});
+							readChannel(Channel.id).catch(console.error);
+							notifChannels = notifChannels.splice(
+								notifChannels.indexOf(Channel.id),
+								1
+							);
+							Array.from(
+								document.getElementsByClassName("channel-newmessage")
+							).forEach((e) => {
+								if (notifChannels.includes(e.id.replace("channelid-", ""))) {
+									e.classList.remove("channel-newmessage");
+								}
+							});
 						}
 					};
 				}

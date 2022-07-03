@@ -82,6 +82,7 @@ body {
 }
 
 #channel-list {
+	color: var(--channels-default);
 	width: 160px;
 	height: 100%;
 	flex-shrink: 0;
@@ -151,7 +152,7 @@ body {
 }
 
 .channel-newmessage {
-	background: #ddd;
+	color: var(--interactive-active);
 }
 
 .channel-date {
