@@ -213,7 +213,9 @@ body {
 }
 #channel-open .channel-openinner .channel-message {
 	display: flex;
-	padding: 7px 14px;
+	/* padding: 7px 14px; */
+	margin-top: 1.0625rem;
+	min-height: 2.75rem;
 }
 .channel-text {
 	margin-left: 5px;
