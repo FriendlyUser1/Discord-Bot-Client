@@ -29,9 +29,8 @@ function mainApp(token) {
 		mainWindow = new BrowserWindow({
 			width: 1030,
 			height: 800,
-			minWidth: 760,
-			maxWidth: 575,
-			minHeight: 200,
+			minWidth: 575,
+			minHeight: 300,
 			icon: __dirname + "/res/icon.png",
 			webPreferences: {
 				nodeIntegration: true,
