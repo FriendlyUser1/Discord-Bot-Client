@@ -39,94 +39,92 @@ addEventListener("load", () => {
 	});
 	ipcRenderer.send("ready");
 
-	const parseMessage = (msg) => {
-		let content = msg.content;
+	const parseMessage = (message) => {
+		let content = message.content;
 
+		// timestamp
 		content = content.replace(timestampRegex, (match, unix, option) => {
-			document
-				.querySelector(`#messageid-${msg.id} .channel-content`)
-				.classList.add("timestamp");
-
 			let timestamp = "",
 				unixdate = new Date(parseInt(unix) * 1000),
 				shortTime = unixdate.toLocaleTimeString(undefined, {
 					timeStyle: "short",
-				});
+				}),
+				tim = ['<span class="timestamp">', "</span>"];
 
 			switch (option) {
 				case "":
 				case "f":
-					timestamp = `${unixdate
+					timestamp = `${tim[0]}${unixdate
 						.toLocaleDateString(undefined, {
 							timeStyle: "short",
 							dateStyle: "long",
 						})
-						.replace("at ", "")}`;
+						.replace("at ", "")}${tim[1]}`;
 					break;
 				case "t":
-					timestamp = shortTime;
+					timestamp = `${tim[0]}${shortTime}${tim[1]}`;
 					break;
 				case "T":
-					timestamp = unixdate.toLocaleTimeString();
+					timestamp = `${tim[0]}${unixdate.toLocaleTimeString()}${tim[1]}`;
 					break;
 				case "d":
-					timestamp = unixdate.toLocaleDateString();
+					timestamp = `${tim[0]}${unixdate.toLocaleDateString()}${tim[1]}`;
 					break;
 				case "D":
-					timestamp = unixdate.toLocaleDateString(undefined, {
+					timestamp = `${tim[0]}${unixdate.toLocaleDateString(undefined, {
 						dateStyle: "long",
-					});
+					})}${tim[1]}`;
 					break;
 				case "F":
-					timestamp = unixdate
+					timestamp = `${tim[0]}${unixdate
 						.toLocaleString(undefined, {
 							dateStyle: "full",
 							timeStyle: "short",
 						})
-						.replace("at ", "");
+						.replace("at ", "")}${tim[1]}`;
 					break;
 				case "R":
-					timestamp = relatime(unixdate.getTime() - new Date());
+					timestamp = `${tim[0]}${relatime(unixdate.getTime() - new Date())}${
+						tim[1]
+					}`;
 					break;
 			}
 			return timestamp;
 		});
 
 		content = content.replace(mentionRegex, (match, type, id) => {
+			if (message.content.startsWith("\\"))
+				return message.content.slice(1, message.content.length);
+
+			let thismention = "",
+				men = ['<span class="mention">', "</span>"];
 			switch (type) {
 				case "@":
 				case "@!":
-					if (msg instanceof Discord.GuildChannel) {
-						const member = msg.guild.members.cache.get(id);
-
-						if (member) {
-							return `@${member.displayName}`;
-						}
-					} else {
-						const user = client.users.cache.get(id);
-
-						if (user) {
-							return `@${user.username}`;
-						}
-					}
+					let user = client.users.cache.get(id);
+					if (message.guild && user) {
+						// I gave up trying to get the GuildMember here. Caching is unreliable and promises are stupid.
+						thismention = `${men[0]}@${user.username}${men[1]}`;
+					} else if (user) {
+						thismention = `${men[0]}@${user.username}${men[1]}`;
+					} else thismention = `${men[0]}@deleted-user${men[1]}`;
 					break;
+
 				case "@&":
-					if (msg instanceof Discord.GuildChannel) {
-						const role = msg.guild.roles.get(id);
+					let role = message.guild.roles.cache.get(id);
+					if (message.guild && role) {
+						thismention = `${men[0]}@${role.name}${men[1]}`;
+					} else thismention = `${men[0]}@deleted-role${men[1]}`;
+					break;
 
-						if (role) {
-							return `@${role.name}`;
-						}
-					}
-					return "@deleted-role";
 				case "#":
-					const channel = client.channels.cache.get(id);
-
+					let channel = client.channels.cache.get(id);
 					if (channel) {
-						return `#${channel.name}`;
-					}
-					return "#deleted-channel";
+						thismention = `${men[0]}#${channel.name}${men[1]}`;
+					} else thismention = `${men[0]}#deleted-channel${men[1]}`;
+					break;
 			}
+			return thismention;
 		});
 
 		return content;
@@ -249,7 +247,7 @@ addEventListener("load", () => {
 		else
 			document.getElementById(`openid-${message.channel.id}`).prepend(outerDiv);
 
-		messageSpan.textContent = parseMessage(message);
+		messageSpan.innerHTML = parseMessage(message);
 	};
 
 	const displayServer = (guild) => {
@@ -618,7 +616,7 @@ addEventListener("load", () => {
 									: "Unknown user"
 							} (#${message.channel.name}, ${message.guild.name})`,
 							{
-								body: message.content,
+								body: parseMessage(message),
 								icon: message.author.displayAvatarURL(),
 							}
 						);

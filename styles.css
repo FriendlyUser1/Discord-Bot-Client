@@ -208,6 +208,10 @@ div.channel-text {
 .timestamp {
 	background-color: var(--background-modifier-accent);
 }
+.mention {
+	background: hsla(235, calc(0.6 * 85.6%), 64.7%, 0.3);
+	color: hsl(236, calc(0.6 * 83.3%), 92.9%);
+}
 #channel-open .channel-textboxcontain {
 	display: flex;
 	justify-content: center;
