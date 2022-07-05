@@ -65,6 +65,12 @@ addEventListener("load", () => {
 		return content;
 	};
 
+	const newElement = (tagname, attributes = {}, children = []) => {
+		const ele = Object.assign(document.createElement(tagname), attributes);
+		children.forEach((child) => ele.appendChild(child));
+		return ele;
+	};
+
 	const newChannel = () => {
 		before = 0;
 		after = 0;
@@ -114,64 +120,67 @@ addEventListener("load", () => {
 		return await channel.messages.fetch(options);
 	};
 
-	const displayMessage = (msg, append) => {
-		let outerDiv = document.createElement("div"),
-			innerImg = document.createElement("img"),
-			innerSpan = document.createElement("span"),
-			namedateSpan = document.createElement("span"),
-			nameSpan = document.createElement("span"),
-			dateSpan = document.createElement("span"),
-			messageSpan = document.createElement("span");
-
-		outerDiv.setAttribute("id", `messageid-${msg.id}`);
-		outerDiv.setAttribute("class", "channel-message");
-
-		innerImg.setAttribute("src", msg.author.displayAvatarURL());
-		innerImg.setAttribute("class", "channel-icon");
-
-		innerSpan.setAttribute("class", "channel-text");
-
-		namedateSpan.setAttribute("class", "channel-namedate");
-
-		nameSpan.textContent = msg.author.username;
-		nameSpan.setAttribute("class", "channel-name");
-		nameSpan.setAttribute("id", `userid-${msg.author.id}`);
-
-		let today = new Date();
-		let date =
-			msg.createdAt.getDate() == today.getDate() &&
-			msg.createdAt.getMonth() == today.getMonth() &&
-			msg.createdAt.getFullYear() == today.getFullYear();
+	const displayMessage = (message, append) => {
+		let today = new Date(),
+			msgca = message.createdAt,
+			msgdate = msgca.getDate(),
+			msgmonth = msgca.getMonth(),
+			date =
+				msgdate == today.getDate() &&
+				msgmonth == today.getMonth() &&
+				msgca.getFullYear() == today.getFullYear();
 		if (date) {
-			date = `Today at ${msg.createdAt.toLocaleTimeString().slice(0, -3)}`;
+			date = `Today at ${msgca.toLocaleTimeString().slice(0, -3)}`;
 		} else if (
-			msg.createdAt.getDate() == today.getDate() - 1 &&
-			(msg.createdAt.getMonth() == today.getMonth() ||
-				msg.createdAt.toString().slice(0, 15) ==
+			msgdate == today.getDate() - 1 &&
+			(msgmonth == today.getMonth() ||
+				msgca.toString().slice(0, 15) ==
 					new Date(today.getFullYear(), today.getMonth(), 0)
 						.toString()
 						.slice(0, 15))
 		)
-			date = `Yesterday at ${msg.createdAt.toLocaleTimeString().slice(0, -3)}`;
-		else date = msg.createdAt.toLocaleDateString();
+			date = `Yesterday at ${msgca.toLocaleTimeString().slice(0, -3)}`;
+		else date = msgca.toLocaleDateString();
 
-		dateSpan.textContent = date;
-		dateSpan.setAttribute("class", "channel-date");
+		let outerDiv = newElement("div", {
+				id: `messageid-${message.id}`,
+				className: "channel-message",
+			}),
+			innerImg = newElement("img", {
+				src: message.author.displayAvatarURL(),
+				className: "channel-icon",
+			}),
+			headerSpan = newElement("div", { className: "channel-header" }),
+			timestampSpan = newElement("span", {
+				className: "timestamp",
+				textContent: date,
+			}),
+			messageSpan = document.createElement("span"),
+			innerSpan = newElement("div", { className: "channel-text" }),
+			nameSpan = newElement("span", {
+				id: `userid-${message.author.id}`,
+				className: "channel-name",
+				textContent: message.author.tag,
+			});
 
-		messageSpan.textContent = parseMessage(msg);
+		messageSpan.textContent = parseMessage(message);
 		messageSpan.setAttribute("class", "channel-content");
 
-		namedateSpan.appendChild(nameSpan);
-		namedateSpan.appendChild(dateSpan);
-		innerSpan.appendChild(namedateSpan);
+		headerSpan.appendChild(nameSpan);
+		headerSpan.appendChild(timestampSpan);
+
+		innerSpan.appendChild(headerSpan);
 		innerSpan.appendChild(messageSpan);
 
 		outerDiv.appendChild(innerImg);
 		outerDiv.appendChild(innerSpan);
+		// outerDiv.appendChild(headerSpan);
+		// outerDiv.appendChild(messageSpan);
 
 		if (append)
-			document.getElementById(`openid-${msg.channel.id}`).append(outerDiv);
-		else document.getElementById(`openid-${msg.channel.id}`).prepend(outerDiv);
+			document.getElementById(`openid-${message.channel.id}`).append(outerDiv);
+		else
+			document.getElementById(`openid-${message.channel.id}`).prepend(outerDiv);
 	};
 
 	const displayServer = (guild) => {
