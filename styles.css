@@ -175,14 +175,18 @@ body {
 	font-size: 14px;
 }
 
-#channel-open .channel-openinner .channel-name {
+.channel-topic {
+	color: var(--text-muted);
+}
+
+#channel-open .channel-openinner .username {
 	font-weight: 500;
 	font-size: 1rem;
 	line-height: 1.375rem;
 	margin-left: 40px;
 	cursor: pointer;
 }
-#channel-open .channel-openinner .channel-name::after {
+#channel-open .channel-openinner .username::after {
 	content: "\a";
 }
 span.date {

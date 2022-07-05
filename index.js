@@ -169,6 +169,8 @@ addEventListener("load", () => {
 		document.querySelector("#channel-list .channel-existing").innerHTML = "";
 		document.querySelector(".channel-guildtopname .channel-name").innerHTML =
 			"";
+		document.querySelector(".channel-guildtopname .channel-topic").innerHTML =
+			"";
 		let oi = document.querySelector(".channel-openinner");
 		oi.id = "";
 		oi.innerHTML = "";
@@ -215,7 +217,7 @@ addEventListener("load", () => {
 			}),
 			nameSpan = newElement("span", {
 				id: `userid-${message.author.id}`,
-				className: "channel-name",
+				className: "username",
 				textContent: message.author.tag,
 			}),
 			dateSpan = newElement("span", {
@@ -377,9 +379,12 @@ addEventListener("load", () => {
 					(perms.includes("VIEW_CHANNEL") &&
 						perms.includes("READ_MESSAGE_HISTORY"))
 				) {
-					document.querySelector(".channel-name").innerHTML = channel.recipient
-						? channel.recipient.username
-						: channel.name;
+					document.querySelector(".channel-name").innerHTML = `#${
+						channel.recipient ? channel.recipient.username : channel.name
+					}`;
+					document.querySelector(".channel-topic").innerHTML = `${
+						channel.topic ? " | " + channel.topic : ""
+					}`;
 					document
 						.querySelector(".channel-textboxcontain .textbox")
 						.setAttribute(
