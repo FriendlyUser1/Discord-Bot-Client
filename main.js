@@ -30,6 +30,7 @@ function mainApp(token) {
 			width: 1030,
 			height: 800,
 			minWidth: 760,
+			maxWidth: 575,
 			minHeight: 200,
 			icon: __dirname + "/res/icon.png",
 			webPreferences: {

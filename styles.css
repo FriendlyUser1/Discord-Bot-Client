@@ -180,11 +180,13 @@ body {
 	font-size: 1rem;
 	line-height: 1.375rem;
 	margin-left: 40px;
+	cursor: pointer;
 }
 #channel-open .channel-openinner .channel-name::after {
 	content: "\a";
 }
-span.timestamp {
+span.date {
+	cursor: default;
 	color: var(--text-muted);
 	font-size: 0.75rem;
 	line-height: 1.375rem;
@@ -196,8 +198,11 @@ div.channel-text {
 #channel-open .channel-openinner .channel-content {
 	margin-left: 40px;
 	font-size: 1rem;
-	overflow-wrap: break-word;
+	overflow-wrap: anywhere;
 	display: inline-block;
+}
+.timestamp {
+	background-color: var(--background-modifier-accent);
 }
 #channel-open .channel-textboxcontain {
 	display: flex;
