@@ -50,7 +50,6 @@ body {
 	display: flex;
 	flex-direction: row;
 	height: 100%;
-	/* font-family: sans-serif; */
 	font-family: Whitney;
 	color: #fff;
 }
