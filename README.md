@@ -18,9 +18,8 @@ This application is very unfinished, and is not close to being complete - curren
 
 ### Immediate To-Do List
 
-- Preserve open dms after switching guild
+- Ability to view attachments
 - Ability to edit/delete messages
-- Ability to show/send Images/attachments
 
 ## Installation
 
