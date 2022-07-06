@@ -2,9 +2,6 @@ const { app, BrowserWindow, ipcMain } = require("electron"),
 	fs = require("fs"),
 	path = require("path");
 
-/*      url = require('url'),
-      net = require('net');*/
-
 let mainWindow;
 
 fs.readFile(__dirname + "/token.txt", "utf8", (tokenReadError, token) => {
