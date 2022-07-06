@@ -23,7 +23,7 @@ This application is very unfinished, and is not close to being complete - curren
 
 ## Installation
 
-You will need to install Node.JS and make a [bot] for the program to run
+You will need to install [Node.JS] and make a [bot] for the program to run
 
 1. Download zip [here] and extract it into a folder
 2. Create a text file called `token.txt` in the folder and type your bot's token in it
