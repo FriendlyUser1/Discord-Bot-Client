@@ -23,7 +23,7 @@ This application is very unfinished, and is not close to being complete - curren
 
 ## Installation
 
-You will need to install [`Node.JS`] and make a [bot] for the program to run
+You will need to install Node.JS and make a [bot] for the program to run
 
 1. Download zip [here] and extract it into a folder
 2. Create a text file called `token.txt` in the folder and type your bot's token in it
@@ -39,5 +39,5 @@ Type your message in the text box at the bottom, then press "enter"
 
 [bot]: https://discordjs.guide/preparations/setting-up-a-bot-application.html#your-bot-s-token
 [here]: https://github.com/FriendlyUser1/discord-bot-client/archive/refs/heads/main.zip
-[node.js]: https://nodejs.org/en/
+[Node.JS]: https://nodejs.org/en/
 [User ID]: https://support.discord.com/hc/en-us/articles/206346498-Where-can-I-find-my-User-Server-Message-ID-
