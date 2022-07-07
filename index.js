@@ -19,7 +19,9 @@ const { ipcRenderer } = require("electron"),
 	},
 	mentionRegex = /<(@|@!|@&|#)(\d{17,19})>/gi,
 	timestampRegex = /\<t:([\-]?[0-9]+):?([tTdDfFR]?)\>/g,
-	_ = require("lodash");
+	gifRegex =
+		/https\:\/\/(tenor\.com\/view\/.+gif.[0-9]{8}|imgur.com\/[^\s]+)/gi;
+_ = require("lodash");
 var before = 0,
 	after = 0,
 	loadedMore = 0;
@@ -92,6 +94,7 @@ addEventListener("load", () => {
 			return timestamp;
 		});
 
+		// mentions
 		content = content.replace(mentionRegex, (match, type, id) => {
 			if (message.content.startsWith("\\"))
 				return message.content.slice(1, message.content.length);
@@ -127,7 +130,25 @@ addEventListener("load", () => {
 			return thismention;
 		});
 
+		let isGif = gifRegex.test(content);
+		if (message.attachments.size > 0 || isGif) {
+			let attached = Array.from(message.attachments);
+
+			attached.forEach((attachment) => {
+				let container = document.querySelector(
+					`#messageid-${message.id} .channel-content`
+				);
+
+				container.innerHTML = content;
+			});
+		}
+
 		return content;
+	};
+
+	const trunc = (string) => {
+		if (string.length < 20) return string;
+		return string.substring(0, 20) + "...";
 	};
 
 	const newElement = (tagname, attributes = {}, children = []) => {
@@ -282,12 +303,12 @@ addEventListener("load", () => {
 					perms.includes("READ_MESSAGE_HISTORY"))
 			) {
 				if (!document.querySelector(`#channelid-${channel.id}`)) {
-					let titleSpan = newElement("span", {
+					let titleSpan = newElement("div", {
 							className: "channel-title",
-							textContent: `${channel.type === "dm" ? "@" : "#"}${
+							textContent: `${channel.type === "dm" ? "@ " : "# "}${
 								channel.type === "dm"
 									? channel.recipient.username
-									: channel.name
+									: trunc(channel.name)
 							}`,
 						}),
 						innerSpan = newElement("span", { className: "channel-text" }, [
@@ -313,7 +334,7 @@ addEventListener("load", () => {
 							src: channel.recipient.avatarURL(),
 							className: "channel-icon",
 						});
-						outerDiv.appendChild(innerImg);
+						outerDiv.prepend(innerImg);
 					}
 
 					document
@@ -377,7 +398,7 @@ addEventListener("load", () => {
 					(perms.includes("VIEW_CHANNEL") &&
 						perms.includes("READ_MESSAGE_HISTORY"))
 				) {
-					document.querySelector(".channel-name").innerHTML = `#${
+					document.querySelector(".channel-name").innerHTML = `# ${
 						channel.recipient ? channel.recipient.username : channel.name
 					}`;
 					document.querySelector(".channel-topic").innerHTML = `${
@@ -418,7 +439,7 @@ addEventListener("load", () => {
 	};
 
 	const start = () => {
-		console.clear();
+		// console.clear();
 		console.log("ready");
 
 		let serverList = client.guilds.cache;
@@ -446,6 +467,11 @@ addEventListener("load", () => {
 							while (chans.firstChild) {
 								chans.removeChild(chans.lastChild);
 							}
+
+							openDMs.forEach((channel) => {
+								if (!document.querySelector(`.channelid-${channel.id}`))
+									displayChannel(channel);
+							});
 
 							if (!document.querySelector("#channel-list .channel-add")) {
 								let ndmdiv = document.createElement("div");
