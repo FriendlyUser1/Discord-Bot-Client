@@ -63,15 +63,33 @@ body {
 	width: 28px !important;
 	height: 20px !important;
 }
+.server-item {
+	position: relative;
+	text-align: center;
+	color: white;
+}
+.server-item:hover > .server-icon {
+	cursor: pointer;
+	transition: border-radius 100ms;
+	box-shadow: 0px 0px 0px 2px #fff;
+	border-radius: 40%;
+}
+.server-imgtext {
+	margin-top: 3px;
+	position: absolute;
+	top: 50%;
+	left: 50%;
+	transform: translate(-50%, -50%);
+	cursor: pointer;
+}
 .server-icon {
 	border-radius: 100%;
 	width: 40px;
 	height: 40px;
-	padding: 3px;
+	margin-top: 6px;
 }
-.server-icon:hover {
-	cursor: pointer;
-	transition: border-radius 100ms;
+.server-item [selected] {
+	box-shadow: 0px 0px 0px 2px #fff;
 	border-radius: 40%;
 }
 #server-list {
@@ -211,7 +229,7 @@ body {
 #channel-open .channel-openinner .username::after {
 	content: "\a";
 }
-span.date {
+.date {
 	cursor: default;
 	color: var(--text-muted);
 	font-size: 0.75rem;

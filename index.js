@@ -130,6 +130,7 @@ addEventListener("load", () => {
 			return thismention;
 		});
 
+		// attachments
 		let isGif = gifRegex.test(content);
 		if (message.attachments.size > 0 || isGif) {
 			let attached = Array.from(message.attachments);
@@ -273,21 +274,37 @@ addEventListener("load", () => {
 
 	const displayServer = (guild) => {
 		if (!document.querySelector(`#serverid-${guild.id}`)) {
-			let channelIcon = guild.icon
-					? guild.iconURL()
-					: `https://textoverimage.moesif.com/image?image_url=https://github.com/FriendlyUser1/apis/blob/364c4bd2f4458af085752af557c1ea5837b95baa/dbcguild.png?raw=true&text=${guild.nameAcronym}&x_align=center&y_align=middle&text_size=128`,
-				outerDiv = document.createElement("div"),
-				innerImg = document.createElement("img");
+			let icon,
+				servericon = [];
+			if (guild.icon) {
+				icon = guild.iconURL();
+			} else {
+				servericon.push(
+					newElement("span", {
+						className: "server-imgtext",
+						textContent: guild.nameAcronym,
+						title: guild.name,
+					})
+				);
+				icon =
+					"https://github.com/FriendlyUser1/apis/blob/364c4bd2f4458af085752af557c1ea5837b95baa/dbcguild.png?raw=true";
+			}
 
-			innerImg.setAttribute("src", channelIcon);
-			innerImg.setAttribute("title", guild.name);
-			innerImg.classList.add("server-icon");
-
-			outerDiv.id = `serverid-${guild.id}`;
-			outerDiv.classList.add("server-item");
-			outerDiv.append(innerImg);
-
-			document.querySelector(".server-existing").append(outerDiv);
+			let innerImg = newElement("img", {
+				src: icon,
+				title: guild.name,
+				className: "server-icon",
+			});
+			servericon.push(innerImg);
+			document
+				.querySelector(".server-existing")
+				.append(
+					newElement(
+						"div",
+						{ id: `serverid-${guild.id}`, className: "server-item" },
+						servericon
+					)
+				);
 		}
 	};
 
@@ -415,7 +432,7 @@ addEventListener("load", () => {
 							}`
 						);
 					document
-						.querySelectorAll("[selected]")
+						.querySelectorAll(".channel-existing [selected]")
 						.forEach((s) => s.removeAttribute("selected"));
 					document
 						.querySelector(
@@ -496,6 +513,12 @@ addEventListener("load", () => {
 								});
 						} else {
 							id = path.id.replace("serverid-", "");
+							document
+								.querySelectorAll(".server-existing [selected]")
+								.forEach((s) => s.removeAttribute("selected"));
+							document
+								.querySelector(`#${path.id} .server-icon`)
+								.setAttribute("selected", "");
 							let addDm = document.querySelector("#channel-list .channel-add");
 							if (addDm) addDm.remove();
 						}
