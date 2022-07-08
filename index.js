@@ -472,6 +472,12 @@ addEventListener("load", () => {
 				e.path.forEach((path) => {
 					if (path.id && path.id.includes("serverid")) {
 						Channel = {};
+						document
+							.querySelectorAll(".server-existing [selected]")
+							.forEach((s) => s.removeAttribute("selected"));
+						document
+							.querySelector(`#${path.id} .server-icon`)
+							.setAttribute("selected", "");
 						if (path.id === "serverid-dm") {
 							clearChannel();
 
