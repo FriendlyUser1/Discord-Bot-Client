@@ -186,6 +186,20 @@ addEventListener("load", () => {
 			classes.add("channel-newmessage");
 	};
 
+	const removeServerNotif = (id) => {
+		let guild = client.channels.cache.get(id).guild;
+		let channels = Array.from(guild.channels.cache).map((x) => {
+			return x[0];
+		});
+		console.log(channels.filter((element) => notifChannels.includes(element)));
+		if (
+			channels.filter((element) => notifChannels.includes(element)).length == 0
+		)
+			document
+				.querySelector(`#serverid-${guild.id} img`)
+				.removeAttribute("servernotif");
+	};
+
 	const clearChannel = () => {
 		document.querySelector("#channel-list .channel-existing").innerHTML = "";
 		document.querySelector(".channel-guildtopname .channel-name").innerHTML =
@@ -562,6 +576,8 @@ addEventListener("load", () => {
 							document.getElementById(`channelid-${id}`),
 							true
 						);
+
+						removeServerNotif(id);
 					}
 
 					Channel = client.channels.cache.get(id) || {};
@@ -620,9 +636,15 @@ addEventListener("load", () => {
 
 		client.on("message", (message) => {
 			if (["text", "news", "dm"].includes(message.channel.type)) {
+				if (
+					!document.querySelector(
+						`.server-existing #serverid-${message.guild.id}`
+					)
+				)
+					displayServer(message.guild);
+
 				let id = message.channel.id;
-				if (message.author.id !== client.user.id && !notifChannels.includes(id))
-					notifChannels.push(id);
+
 				if (message.channel.type === "dm" && !openDMs.includes(message.channel))
 					openDMs.push(message.channel);
 
@@ -635,6 +657,23 @@ addEventListener("load", () => {
 							.querySelector("#channel-open .channel-openinner")
 							.getAttribute("id")
 							.replace("openid-", "");
+
+				if (
+					message.author.id !== client.user.id &&
+					!notifChannels.includes(id) &&
+					!activeChannel
+				)
+					notifChannels.push(id);
+
+				let activeServer = document
+					.querySelector(`.server-existing #serverid-${message.guild.id} img`)
+					.hasAttribute("selected");
+
+				if (!activeServer) {
+					document
+						.querySelector(`#serverid-${message.guild.id} img`)
+						.setAttribute("servernotif", "");
+				}
 
 				if (activeChannel) {
 					displayMessage(message, true);
@@ -660,7 +699,7 @@ addEventListener("load", () => {
 					}
 
 					let notif;
-					if (message.guild) {
+					if (message.guild && !activeChannel) {
 						let messageMember = message.guild.member(message.author);
 
 						notif = new Notification(
@@ -686,6 +725,15 @@ addEventListener("load", () => {
 					notif.onclick = () => {
 						if (!activeChannel) {
 							Channel = message.channel;
+							if (!activeServer) {
+								if (document.querySelector(`.server-item [selected]`))
+									document
+										.querySelector(`.server-item [selected]`)
+										.removeAttribute("selected");
+								document
+									.querySelector(`#serverid-${message.guild.id} img`)
+									.setAttribute("selected", "");
+							}
 							Guild = message.guild ?? {};
 							newChannel();
 							clearChannel();
@@ -707,8 +755,13 @@ addEventListener("load", () => {
 							).forEach((e) => {
 								if (notifChannels.includes(e.id.replace("channelid-", ""))) {
 									e.classList.remove("channel-newmessage");
+									notifChannels.splice(
+										notifChannels.indexOf(e.id.replace("channelid-", "")),
+										1
+									);
 								}
 							});
+							removeServerNotif(Channel.id);
 						}
 					};
 				}
