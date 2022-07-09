@@ -41,9 +41,8 @@ addEventListener("load", () => {
 	});
 	ipcRenderer.send("ready");
 
-	const parseMessage = (message) => {
+	const parseMessage = (message, notif = false) => {
 		let content = message.content;
-
 		// timestamp
 		content = content.replace(timestampRegex, (match, unix, option) => {
 			let timestamp = "",
@@ -129,6 +128,8 @@ addEventListener("load", () => {
 			}
 			return thismention;
 		});
+
+		if (notif) return content == "" ? "Sent an attachment" : content;
 
 		// attachments
 		let isGif = gifRegex.test(content);
@@ -671,7 +672,7 @@ addEventListener("load", () => {
 									: "Unknown user"
 							} (#${message.channel.name}, ${message.guild.name})`,
 							{
-								body: parseMessage(message),
+								body: parseMessage(message, true),
 								icon: message.author.displayAvatarURL(),
 							}
 						);
