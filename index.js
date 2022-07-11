@@ -134,15 +134,26 @@ addEventListener("load", () => {
 		// attachments
 		let isGif = gifRegex.test(content);
 		if (message.attachments.size > 0 || isGif) {
-			let attached = Array.from(message.attachments);
+			let html = "";
 
-			attached.forEach((attachment) => {
-				let container = document.querySelector(
-					`#messageid-${message.id} .channel-content`
-				);
+			if (isGif) {
+				content.match(gifRegex).forEach((gifurl) => {
+					html += `<img src="${gifurl}.gif"></img>`;
+				});
+			}
 
-				container.innerHTML = content;
-			});
+			if (message.attachments.size > 0) {
+				let attached = Array.from(message.attachments);
+				attached.forEach((attachment) => {
+					let container = document.querySelector(
+						`#messageid-${message.id} .channel-content`
+					);
+				});
+			}
+
+			// console.log(html);
+
+			return html;
 		}
 
 		return content;
@@ -279,9 +290,12 @@ addEventListener("load", () => {
 				[innerImg, innerSpan]
 			);
 
-		if (append)
-			document.getElementById(`openid-${message.channel.id}`).append(outerDiv);
-		else
+		if (append) {
+			// document.getElementById(`openid-${message.channel.id}`).append(outerDiv);
+			document
+				.getElementById(`openid-${message.channel.id}`)
+				.insertBefore(outerDiv, document.getElementById("scroll-el"));
+		} else
 			document.getElementById(`openid-${message.channel.id}`).prepend(outerDiv);
 
 		messageSpan.innerHTML = parseMessage(message);
@@ -378,43 +392,57 @@ addEventListener("load", () => {
 	};
 
 	const displayMore = async (channel) => {
-		fetchMessages(channel, { limit: 100, before: before }).then((messages) => {
-			messages = Array.from(messages.values());
+		fetchMessages(channel, { limit: 100, before: before }).then(
+			async (messages) => {
+				messages = Array.from(messages.values());
 
-			if (messages.length > 0) {
-				if (before != 0) loadedMore++;
-				before = messages[messages.length - 1].id;
-				after = messages[0].id;
+				if (messages.length > 0) {
+					if (before != 0) loadedMore++;
+					before = messages[messages.length - 1].id;
+					after = messages[0].id;
 
-				document
-					.querySelector("#channel-list .channel-existing")
-					.addEventListener("click", (e) => {
-						if (
-							e.target.hasAttribute("class") &&
-							Array.from(e.target.classList).includes("channel-item")
-						) {
-							handleChannelNotif(e.target, true);
-							notifChannels.splice(
-								notifChannels.indexOf(e.target.id.replace("channelid-", ""), 1)
-							);
-						}
+					document
+						.querySelector("#channel-list .channel-existing")
+						.addEventListener("click", (e) => {
+							if (
+								e.target.hasAttribute("class") &&
+								Array.from(e.target.classList).includes("channel-item")
+							) {
+								handleChannelNotif(e.target, true);
+								notifChannels.splice(
+									notifChannels.indexOf(
+										e.target.id.replace("channelid-", ""),
+										1
+									)
+								);
+							}
+						});
+
+					document
+						.querySelector("#channel-open .channel-openinner")
+						.setAttribute("id", `openid-${channel.id}`);
+
+					messages.forEach((msg) => {
+						displayMessage(msg, false);
 					});
 
-				document
-					.querySelector("#channel-open .channel-openinner")
-					.setAttribute("id", `openid-${channel.id}`);
+					document.getElementById(`openid-${channel.id}`).append(
+						newElement("span", {
+							style: "display:block; height:1px;",
+							id: "scroll-el",
+						})
+					);
 
-				messages.forEach((msg) => {
-					displayMessage(msg, false);
-				});
-				if (after != 0 && loadedMore === 0) {
-					document
-						.getElementById(`messageid-${after}`)
-						.scrollIntoView({ behaviour: "smooth", block: "end" });
+					if (after != 0 && loadedMore === 0) {
+						await new Promise((r) => setTimeout(r, 75));
+						document
+							.getElementById("scroll-el")
+							.scrollIntoView({ behaviour: "smooth", block: "end" });
+					}
+					return messages;
 				}
-				return messages;
 			}
-		});
+		);
 	};
 
 	const readChannel = (id) => {
@@ -634,7 +662,7 @@ addEventListener("load", () => {
 			}
 		};
 
-		client.on("message", (message) => {
+		client.on("message", async (message) => {
 			if (["text", "news", "dm"].includes(message.channel.type)) {
 				if (
 					!document.querySelector(
@@ -678,8 +706,10 @@ addEventListener("load", () => {
 				if (activeChannel) {
 					displayMessage(message, true);
 					after = message.id;
+					await new Promise((r) => setTimeout(r, 500));
 					document
-						.getElementById(`messageid-${message.id}`)
+						// .getElementById(`messageid-${message.id}`)
+						.getElementById("scroll-el")
 						.scrollIntoView({ behaviour: "smooth", block: "end" });
 				} else if (
 					!document.getElementById(`channelid-${id}`) &&
