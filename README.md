@@ -18,7 +18,7 @@ This application is very unfinished, and is not close to being complete - curren
 
 ### Immediate To-Do List
 
-- Ability to view attachments
+- Ability to view all attachments
 - Ability to edit/delete messages
 
 ## Installation
