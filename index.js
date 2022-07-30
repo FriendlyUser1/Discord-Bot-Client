@@ -1,34 +1,17 @@
+import { parseMessage, newElement } from "./helpers/index.js";
 const { ipcRenderer } = require("electron"),
 	Discord = require("discord.js"),
 	client = new Discord.Client(),
-	relatime = (elapsed) => {
-		let units = [
-				["year", 31536000000],
-				["month", 2628000000],
-				["day", 86400000],
-				["hour", 3600000],
-				["minute", 60000],
-				["second", 1000],
-			],
-			rtf = new Intl.RelativeTimeFormat("en", { numeric: "auto" });
-		for (const [unit, amount] of units) {
-			if (Math.abs(elapsed) > amount || unit === "second") {
-				return rtf.format(Math.round(elapsed / amount), unit);
-			}
-		}
-	},
-	mentionRegex = /<(@|@!|@&|#)(\d{17,19})>/gi,
-	timestampRegex = /\<t:([\-]?[0-9]+):?([tTdDfFR]?)\>/g,
-	gifRegex =
-		/https\:\/\/(tenor\.com\/view\/.+gif.[0-9]{8}|imgur.com\/[^\s]+)/gi;
-_ = require("lodash");
-var before = 0,
+	_ = require("lodash");
+
+let before = 0,
 	after = 0,
-	loadedMore = 0;
-let Channel = {},
+	loadedMore = 0,
+	Channel = {},
 	Guild = {},
 	notifChannels = [],
-	openDMs = [];
+	openDMs = [],
+	freezeClick = false;
 
 addEventListener("load", () => {
 	let windowActive = document.hidden;
@@ -41,133 +24,9 @@ addEventListener("load", () => {
 	});
 	ipcRenderer.send("ready");
 
-	const parseMessage = (message, notif = false) => {
-		let content = message.content;
-		// timestamp
-		content = content.replace(timestampRegex, (match, unix, option) => {
-			let timestamp = "",
-				unixdate = new Date(parseInt(unix) * 1000),
-				shortTime = unixdate.toLocaleTimeString(undefined, {
-					timeStyle: "short",
-				}),
-				tim = ['<span class="timestamp">', "</span>"];
-
-			switch (option) {
-				case "":
-				case "f":
-					timestamp = `${tim[0]}${unixdate
-						.toLocaleDateString(undefined, {
-							timeStyle: "short",
-							dateStyle: "long",
-						})
-						.replace("at ", "")}${tim[1]}`;
-					break;
-				case "t":
-					timestamp = `${tim[0]}${shortTime}${tim[1]}`;
-					break;
-				case "T":
-					timestamp = `${tim[0]}${unixdate.toLocaleTimeString()}${tim[1]}`;
-					break;
-				case "d":
-					timestamp = `${tim[0]}${unixdate.toLocaleDateString()}${tim[1]}`;
-					break;
-				case "D":
-					timestamp = `${tim[0]}${unixdate.toLocaleDateString(undefined, {
-						dateStyle: "long",
-					})}${tim[1]}`;
-					break;
-				case "F":
-					timestamp = `${tim[0]}${unixdate
-						.toLocaleString(undefined, {
-							dateStyle: "full",
-							timeStyle: "short",
-						})
-						.replace("at ", "")}${tim[1]}`;
-					break;
-				case "R":
-					timestamp = `${tim[0]}${relatime(unixdate.getTime() - new Date())}${
-						tim[1]
-					}`;
-					break;
-			}
-			return timestamp;
-		});
-
-		// mentions
-		content = content.replace(mentionRegex, (match, type, id) => {
-			if (message.content.startsWith("\\"))
-				return message.content.slice(1, message.content.length);
-
-			let thismention = "",
-				men = ['<span class="mention">', "</span>"];
-			switch (type) {
-				case "@":
-				case "@!":
-					let user = client.users.cache.get(id);
-					if (message.guild && user) {
-						// I gave up trying to get the GuildMember here. Caching is unreliable and promises are stupid.
-						thismention = `${men[0]}@${user.username}${men[1]}`;
-					} else if (user) {
-						thismention = `${men[0]}@${user.username}${men[1]}`;
-					} else thismention = `${men[0]}@deleted-user${men[1]}`;
-					break;
-
-				case "@&":
-					let role = message.guild.roles.cache.get(id);
-					if (message.guild && role) {
-						thismention = `${men[0]}@${role.name}${men[1]}`;
-					} else thismention = `${men[0]}@deleted-role${men[1]}`;
-					break;
-
-				case "#":
-					let channel = client.channels.cache.get(id);
-					if (channel) {
-						thismention = `${men[0]}#${channel.name}${men[1]}`;
-					} else thismention = `${men[0]}#deleted-channel${men[1]}`;
-					break;
-			}
-			return thismention;
-		});
-
-		if (notif) return content == "" ? "Sent an attachment" : content;
-
-		// attachments
-		let isGif = gifRegex.test(content);
-		if (message.attachments.size > 0 || isGif) {
-			let html = "";
-
-			if (isGif) {
-				content.match(gifRegex).forEach((gifurl) => {
-					html += `<img src="${gifurl}.gif"></img>`;
-				});
-			}
-
-			if (message.attachments.size > 0) {
-				let attached = Array.from(message.attachments);
-				attached.forEach((attachment) => {
-					let container = document.querySelector(
-						`#messageid-${message.id} .channel-content`
-					);
-				});
-			}
-
-			// console.log(html);
-
-			return html;
-		}
-
-		return content;
-	};
-
 	const trunc = (string) => {
 		if (string.length < 20) return string;
 		return string.substring(0, 20) + "...";
-	};
-
-	const newElement = (tagname, attributes = {}, children = []) => {
-		const ele = Object.assign(document.createElement(tagname), attributes);
-		children.forEach((child) => ele.appendChild(child));
-		return ele;
 	};
 
 	const newChannel = () => {
@@ -202,7 +61,7 @@ addEventListener("load", () => {
 		let channels = Array.from(guild.channels.cache).map((x) => {
 			return x[0];
 		});
-		console.log(channels.filter((element) => notifChannels.includes(element)));
+		// console.log(channels.filter((element) => notifChannels.includes(element)));
 		if (
 			channels.filter((element) => notifChannels.includes(element)).length == 0
 		)
@@ -291,14 +150,13 @@ addEventListener("load", () => {
 			);
 
 		if (append) {
-			// document.getElementById(`openid-${message.channel.id}`).append(outerDiv);
 			document
 				.getElementById(`openid-${message.channel.id}`)
 				.insertBefore(outerDiv, document.getElementById("scroll-el"));
 		} else
 			document.getElementById(`openid-${message.channel.id}`).prepend(outerDiv);
 
-		messageSpan.innerHTML = parseMessage(message);
+		messageSpan.prepend(parseMessage(message, client, false));
 	};
 
 	const displayServer = (guild) => {
@@ -398,25 +256,8 @@ addEventListener("load", () => {
 
 				if (messages.length > 0) {
 					if (before != 0) loadedMore++;
-					before = messages[messages.length - 1].id;
+					before = parseInt(messages[messages.length - 1].id);
 					after = messages[0].id;
-
-					document
-						.querySelector("#channel-list .channel-existing")
-						.addEventListener("click", (e) => {
-							if (
-								e.target.hasAttribute("class") &&
-								Array.from(e.target.classList).includes("channel-item")
-							) {
-								handleChannelNotif(e.target, true);
-								notifChannels.splice(
-									notifChannels.indexOf(
-										e.target.id.replace("channelid-", ""),
-										1
-									)
-								);
-							}
-						});
 
 					document
 						.querySelector("#channel-open .channel-openinner")
@@ -434,10 +275,12 @@ addEventListener("load", () => {
 					);
 
 					if (after != 0 && loadedMore === 0) {
+						freezeClick = true;
 						await new Promise((r) => setTimeout(r, 75));
 						document
 							.getElementById("scroll-el")
 							.scrollIntoView({ behaviour: "smooth", block: "end" });
+						freezeClick = false;
 					}
 					return messages;
 				}
@@ -446,7 +289,7 @@ addEventListener("load", () => {
 	};
 
 	const readChannel = (id) => {
-		return new Promise(function (success, fail) {
+		return new Promise((success, fail) => {
 			let channel = client.channels.cache.get(id);
 			if (channel) {
 				let perms;
@@ -491,7 +334,7 @@ addEventListener("load", () => {
 	};
 
 	const createDM = (id) => {
-		return new Promise(async function (success, fail) {
+		return new Promise(async (success, fail) => {
 			let user = client.users.cache.get(String(id));
 			if (user) user.createDM().then(success).catch(fail);
 			else fail("User Not Found");
@@ -512,7 +355,7 @@ addEventListener("load", () => {
 			.querySelector("#server-list .server-existing")
 			.addEventListener("click", (e) => {
 				let id = null;
-				e.path.forEach((path) => {
+				e.composedPath().forEach((path) => {
 					if (path.id && path.id.includes("serverid")) {
 						Channel = {};
 						document
@@ -586,8 +429,21 @@ addEventListener("load", () => {
 		document
 			.querySelector("#channel-list .channel-existing")
 			.addEventListener("click", (e) => {
+				if (freezeClick) {
+					return;
+				}
+
+				if (
+					e.target.hasAttribute("class") &&
+					Array.from(e.target.classList).includes("channel-item")
+				) {
+					handleChannelNotif(e.target, true);
+					notifChannels.splice(
+						notifChannels.indexOf(e.target.id.replace("channelid-", ""), 1)
+					);
+				}
 				let id = null;
-				e.path.forEach((path) => {
+				e.composedPath().forEach((path) => {
 					if (
 						path.id &&
 						path.id.includes("channelid") &&
@@ -705,10 +561,9 @@ addEventListener("load", () => {
 
 				if (activeChannel) {
 					displayMessage(message, true);
-					after = message.id;
+					after = parseInt(message.id);
 					await new Promise((r) => setTimeout(r, 500));
 					document
-						// .getElementById(`messageid-${message.id}`)
 						.getElementById("scroll-el")
 						.scrollIntoView({ behaviour: "smooth", block: "end" });
 				} else if (
@@ -741,7 +596,7 @@ addEventListener("load", () => {
 									: "Unknown user"
 							} (#${message.channel.name}, ${message.guild.name})`,
 							{
-								body: parseMessage(message, true),
+								body: parseMessage(message, client, true),
 								icon: message.author.displayAvatarURL(),
 							}
 						);
@@ -814,9 +669,7 @@ addEventListener("load", () => {
 							.id.replace("openid-", "")
 					);
 					if (Channel) {
-						Channel.send(e.target.value).then((message) => {
-							displayMessage(message, true);
-						});
+						Channel.send(e.target.value);
 
 						e.target.value = "";
 					}
