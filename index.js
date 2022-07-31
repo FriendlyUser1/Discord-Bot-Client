@@ -1,17 +1,25 @@
-import { parseMessage, newElement } from "./helpers/index.js";
+import {
+	parseMessage,
+	newElement,
+	displayMessage,
+	readChannel,
+	generateMessages,
+} from "./helpers/index.js";
 const { ipcRenderer } = require("electron"),
 	Discord = require("discord.js"),
-	client = new Discord.Client(),
 	_ = require("lodash");
 
-let before = 0,
-	after = 0,
-	loadedMore = 0,
-	Channel = {},
+export const client = new Discord.Client();
+Object.assign(global, {
+	Before: 0,
+	After: 0,
+	loadedMore: 0,
+	freezeClick: false,
+});
+let Channel = {},
 	Guild = {},
 	notifChannels = [],
-	openDMs = [],
-	freezeClick = false;
+	openDMs = [];
 
 addEventListener("load", () => {
 	let windowActive = document.hidden;
@@ -24,15 +32,10 @@ addEventListener("load", () => {
 	});
 	ipcRenderer.send("ready");
 
-	const trunc = (string) => {
-		if (string.length < 20) return string;
-		return string.substring(0, 20) + "...";
-	};
-
 	const newChannel = () => {
-		before = 0;
-		after = 0;
-		loadedMore = 0;
+		global.Before = 0;
+		global.After = 0;
+		global.loadedMore = 0;
 		document.querySelector("#channel-open .channel-openinner").innerHTML = "";
 	};
 
@@ -84,79 +87,6 @@ addEventListener("load", () => {
 
 		if (textbox.hasAttribute("placeholder"))
 			textbox.removeAttribute("placeholder");
-	};
-
-	const fetchMessages = async (channel, options) => {
-		if (options.before === 0) {
-			delete options.before;
-		}
-
-		return await channel.messages.fetch(options);
-	};
-
-	const displayMessage = (message, append) => {
-		let today = new Date(),
-			msgca = message.createdAt,
-			msgdate = msgca.getDate(),
-			msgmonth = msgca.getMonth(),
-			date =
-				msgdate == today.getDate() &&
-				msgmonth == today.getMonth() &&
-				msgca.getFullYear() == today.getFullYear();
-		if (date) {
-			date = `Today at ${msgca.toLocaleTimeString().slice(0, -3)}`;
-		} else if (
-			msgdate == today.getDate() - 1 &&
-			(msgmonth == today.getMonth() ||
-				msgca.toString().slice(0, 15) ==
-					new Date(today.getFullYear(), today.getMonth(), 0)
-						.toString()
-						.slice(0, 15))
-		)
-			date = `Yesterday at ${msgca.toLocaleTimeString().slice(0, -3)}`;
-		else date = msgca.toLocaleDateString();
-
-		let innerImg = newElement("img", {
-				src: message.author.displayAvatarURL(),
-				className: "channel-icon",
-			}),
-			nameSpan = newElement("span", {
-				id: `userid-${message.author.id}`,
-				className: "username",
-				textContent: message.author.tag,
-			}),
-			dateSpan = newElement("span", {
-				className: "date",
-				textContent: date,
-			}),
-			headerSpan = newElement("div", { className: "channel-header" }, [
-				nameSpan,
-				dateSpan,
-			]),
-			messageSpan = newElement("span", {
-				className: "channel-content",
-			}),
-			innerSpan = newElement("div", { className: "channel-text" }, [
-				headerSpan,
-				messageSpan,
-			]),
-			outerDiv = newElement(
-				"div",
-				{
-					id: `messageid-${message.id}`,
-					className: "channel-message",
-				},
-				[innerImg, innerSpan]
-			);
-
-		if (append) {
-			document
-				.getElementById(`openid-${message.channel.id}`)
-				.insertBefore(outerDiv, document.getElementById("scroll-el"));
-		} else
-			document.getElementById(`openid-${message.channel.id}`).prepend(outerDiv);
-
-		messageSpan.prepend(parseMessage(message, client, false));
 	};
 
 	const displayServer = (guild) => {
@@ -212,7 +142,9 @@ addEventListener("load", () => {
 							textContent: `${channel.type === "dm" ? "@ " : "# "}${
 								channel.type === "dm"
 									? channel.recipient.username
-									: trunc(channel.name)
+									: channel.name.length >= 20
+									? channel.name.substring(0, 20) + "..."
+									: channel.name
 							}`,
 						}),
 						innerSpan = newElement("span", { className: "channel-text" }, [
@@ -249,91 +181,7 @@ addEventListener("load", () => {
 		}
 	};
 
-	const displayMore = async (channel) => {
-		fetchMessages(channel, { limit: 100, before: before }).then(
-			async (messages) => {
-				messages = Array.from(messages.values());
-
-				if (messages.length > 0) {
-					if (before != 0) loadedMore++;
-					before = parseInt(messages[messages.length - 1].id);
-					after = messages[0].id;
-
-					document
-						.querySelector("#channel-open .channel-openinner")
-						.setAttribute("id", `openid-${channel.id}`);
-
-					messages.forEach((msg) => {
-						displayMessage(msg, false);
-					});
-
-					document.getElementById(`openid-${channel.id}`).append(
-						newElement("span", {
-							style: "display:block; height:1px;",
-							id: "scroll-el",
-						})
-					);
-
-					if (after != 0 && loadedMore === 0) {
-						freezeClick = true;
-						await new Promise((r) => setTimeout(r, 75));
-						document
-							.getElementById("scroll-el")
-							.scrollIntoView({ behaviour: "smooth", block: "end" });
-						freezeClick = false;
-					}
-					return messages;
-				}
-			}
-		);
-	};
-
-	const readChannel = (id) => {
-		return new Promise((success, fail) => {
-			let channel = client.channels.cache.get(id);
-			if (channel) {
-				let perms;
-				if (channel.type !== "dm")
-					perms = channel.permissionsFor(client.user).toArray();
-				else perms = [];
-				if (
-					channel.type === "dm" ||
-					(perms.includes("VIEW_CHANNEL") &&
-						perms.includes("READ_MESSAGE_HISTORY"))
-				) {
-					document.querySelector(".channel-name").innerHTML = `# ${
-						channel.recipient ? channel.recipient.username : channel.name
-					}`;
-					document.querySelector(".channel-topic").innerHTML = `${
-						channel.topic ? " | " + channel.topic : ""
-					}`;
-					document
-						.querySelector(".channel-textboxcontain .textbox")
-						.setAttribute(
-							"placeholder",
-							`Message ${
-								channel.recipient
-									? `@${channel.recipient.username}`
-									: `#${channel.name}`
-							}`
-						);
-					document
-						.querySelectorAll(".channel-existing [selected]")
-						.forEach((s) => s.removeAttribute("selected"));
-					document
-						.querySelector(
-							`#channel-list .channel-existing #channelid-${channel.id}`
-						)
-						.setAttribute("selected", "");
-
-					var messages = displayMore(channel);
-					success({ messages, channel });
-				}
-			}
-		});
-	};
-
-	const createDM = (id) => {
+	const newDM = (id) => {
 		return new Promise(async (success, fail) => {
 			let user = client.users.cache.get(String(id));
 			if (user) user.createDM().then(success).catch(fail);
@@ -470,54 +318,7 @@ addEventListener("load", () => {
 				}
 			});
 
-		const addUserFromInput = () => {
-			if (document.querySelector("#channel-list .channel-add input").value) {
-				if (
-					document
-						.querySelector("#channel-list .channel-add input")
-						.hasAttribute("class")
-				) {
-					document
-						.querySelector("#channel-list .channel-add input")
-						.removeAttribute("class");
-				}
-
-				let id = document.querySelector(
-					"#channel-list .channel-add input"
-				).value;
-				if (id != "" && parseInt(id) && id.length === 18) {
-					user = client.users
-						.fetch(id)
-						.then((user) => {
-							if (user) {
-								createDM(user.id)
-									.then((c) => {
-										if (!openDMs.includes(c)) openDMs.push(c);
-
-										openDMs.forEach((channel) => {
-											if (!document.querySelector(`.channelid-${c.id}`))
-												displayChannel(channel);
-										});
-									})
-									.catch((e) => {
-										document
-											.querySelector("#channel-list .channel-add input")
-											.classList.add("error");
-									});
-								document.querySelector(
-									"#channel-list .channel-add input"
-								).value = "";
-							}
-						})
-						.catch((e) => {
-							document
-								.querySelector("#channel-list .channel-add input")
-								.classList.add("error");
-						});
-				}
-			}
-		};
-
+		// TODO EXTACT MESSAGE EVENT INTO EVENTS FOLDER
 		client.on("message", async (message) => {
 			if (["text", "news", "dm"].includes(message.channel.type)) {
 				if (
@@ -561,7 +362,7 @@ addEventListener("load", () => {
 
 				if (activeChannel) {
 					displayMessage(message, true);
-					after = parseInt(message.id);
+					global.After = parseInt(message.id);
 					await new Promise((r) => setTimeout(r, 500));
 					document
 						.getElementById("scroll-el")
@@ -596,7 +397,7 @@ addEventListener("load", () => {
 									: "Unknown user"
 							} (#${message.channel.name}, ${message.guild.name})`,
 							{
-								body: parseMessage(message, client, true),
+								body: parseMessage(message, true),
 								icon: message.author.displayAvatarURL(),
 							}
 						);
@@ -689,7 +490,7 @@ addEventListener("load", () => {
 							.querySelector(".channel-openinner")
 							.id.replace("openid-", "")
 					);
-					if (Channel) displayMore(Channel);
+					if (Channel) generateMessages(Channel);
 				}
 			}, 3000)
 		);

@@ -253,10 +253,21 @@ div.channel-text {
 }
 .timestamp {
 	background-color: var(--background-modifier-accent);
+	margin-left: 3px;
+	padding: 1px 2px;
+	border-radius: 2px;
 }
 .mention {
 	background-color: hsla(235, calc(0.6 * 85.6%), 64.7%, 0.3);
 	color: hsl(236, calc(0.6 * 83.3%), 92.9%);
+	margin-left: 3px;
+	padding: 1px 2px;
+	border-radius: 2px;
+}
+.emoji {
+	display: inline;
+	max-width: 48px;
+	margin-left: 3px;
 }
 #channel-open .channel-textboxcontain {
 	display: flex;

@@ -22,6 +22,10 @@ This application is very unfinished, and is not close to being complete - curren
 - Ability to view all attachments
 - Ability to edit/delete messages
 
+### Known issues
+
+- With mentions, timestamps and emojis the other text is not correctly placed around it
+
 ## Installation
 
 You will need to install [Node.JS] and make a [bot] will all [intents] in the developer dashboard selected for the program to run

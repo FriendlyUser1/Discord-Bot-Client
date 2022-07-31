@@ -1,4 +1,5 @@
-import { newElement } from "./newElement.js";
+import { newElement } from "./index.js";
+import { client } from "../index.js";
 const Discord = require("discord.js"),
 	relatime = (elapsed) => {
 		let units = [
@@ -16,19 +17,19 @@ const Discord = require("discord.js"),
 			}
 		}
 	},
-	mentionRegex = /\\?<(@|@!|@&|#)(\d{17,19})>/gi,
 	timestampRegex = /\<t:([\-]?[0-9]+):?([tTdDfFR]?)\>/g,
+	mentionRegex = /\\?<(@|@!|@&|#)(\d{17,19})>/gi,
+	emojiRegex = /\\?<(a?):[^\s:]+:([0-9]{19})>/g,
 	gifRegex =
-		/https\:\/\/(tenor\.com\/view\/[^\s:]+gif.[0-9]{8}|imgur.com\/[^\s]+)/gi;
+		/https\:\/\/(tenor\.com\/view\/[^\s]+?gif.[0-9]{8}|imgur.com\/[^\s]{7}|media.discordapp.net\/attachments\/[0-9]{18}\/[0-9]{18}\/[^\s]+?.gif)/gi;
 
 /**
  *
  * @param {Discord.Message} message The message to parse
- * @param {Discord.Client} client The current client
  * @param {Boolean} notif If being used for a notification
  * @returns {string} The new message content
  */
-export const parseMessage = (message, client, notif) => {
+export const parseMessage = (message, notif) => {
 	let content = message.content,
 		messageDiv = document.querySelector(
 			`#messageid-${message.id} .channel-text .channel-content`
@@ -40,109 +41,128 @@ export const parseMessage = (message, client, notif) => {
 			unixdate = new Date(parseInt(unix) * 1000),
 			shortTime = unixdate.toLocaleTimeString(undefined, {
 				timeStyle: "short",
-			}),
-			tim = ['<span class="timestamp">', "</span>"];
+			});
 
 		switch (option) {
 			case "":
 			case "f":
-				timestamp = `${tim[0]}${unixdate
-					.toLocaleDateString(undefined, {
-						timeStyle: "short",
-						dateStyle: "long",
-					})
-					.replace("at ", "")}${tim[1]}`;
+				timestamp = new Intl.DateTimeFormat(undefined, {
+					timeStyle: "short",
+					dateStyle: "long",
+				})
+					.format(unixdate)
+					.replace("at ", "");
 				break;
 			case "t":
-				timestamp = `${tim[0]}${shortTime}${tim[1]}`;
+				timestamp = shortTime;
 				break;
 			case "T":
-				timestamp = `${tim[0]}${unixdate.toLocaleTimeString()}${tim[1]}`;
+				timestamp = unixdate.toLocaleTimeString();
 				break;
 			case "d":
-				timestamp = `${tim[0]}${unixdate.toLocaleDateString()}${tim[1]}`;
+				timestamp = unixdate.toLocaleDateString();
 				break;
 			case "D":
-				timestamp = `${tim[0]}${unixdate.toLocaleDateString(undefined, {
+				timestamp = unixdate.toLocaleDateString(undefined, {
 					dateStyle: "long",
-				})}${tim[1]}`;
+				});
 				break;
 			case "F":
-				timestamp = `${tim[0]}${unixdate
+				timestamp = unixdate
 					.toLocaleString(undefined, {
 						dateStyle: "full",
 						timeStyle: "short",
 					})
-					.replace("at ", "")}${tim[1]}`;
+					.replace("at ", "");
 				break;
 			case "R":
-				timestamp = `${tim[0]}${relatime(unixdate.getTime() - new Date())}${
-					tim[1]
-				}`;
+				timestamp = relatime(unixdate.getTime() - new Date());
 				break;
 		}
-		return timestamp;
+		messageDiv.appendChild(
+			newElement("span", { className: "timestamp" }, [timestamp])
+		);
+		return notif ? timestamp : "";
 	});
 
 	// mentions
-	content = content.replace(mentionRegex, (match, type, id) => {
-		if (message.content.charAt(0) === "\\")
-			return message.content.slice(1, message.content.length);
+	content = content.replace(mentionRegex, (match, type, mentionID) => {
+		if (match.charAt(0) === "\\") return match.slice(1, message.content.length);
 
 		let thismention = "";
 		switch (type) {
 			case "@":
 			case "@!":
-				let user = client.users.cache.get(id);
+				let user = client.users.cache.get(mentionID);
 				if (user) thismention = `@${user.username}`;
 				else thismention = `@deleted-user`;
 				break;
 
 			case "@&":
-				let role = message.guild.roles.cache.get(id);
+				let role = message.guild.roles.cache.get(mentionID);
 				if (message.guild && role) thismention = `@${role.name}`;
 				else thismention = `@deleted-role`;
 				break;
 
 			case "#":
-				let channel = client.channels.cache.get(id);
+				let channel = client.channels.cache.get(mentionID);
 				if (channel) thismention = `#${channel.name}`;
 				else thismention = `#deleted-channel`;
 				break;
 		}
+
+		if (notif) return thismention;
 		messageDiv.appendChild(
-			newElement("span", { className: "mention" }, [thismention])
+			newElement("span", { className: `mention mention-${mentionID}` }, [
+				thismention,
+			])
 		);
 		return "";
 	});
 
+	// emoji
+	content = content.replace(emojiRegex, (match, ani, emojiID) => {
+		if (match.charAt(0) === "\\") return match.slice(1, message.content.length);
+
+		if (content.replace(emojiRegex, "").trim() !== "")
+			messageDiv.appendChild(newElement("div", { style: "height:5px;" }));
+
+		messageDiv.appendChild(
+			newElement("img", {
+				src: `https://cdn.discordapp.com/emojis/${emojiID}.${
+					ani !== "" ? "gif" : "png"
+				}?v=1`,
+				className: `emoji emoji-${emojiID}`,
+			})
+		);
+		return "";
+	});
+
+	// notifs
 	if (notif) return content == "" ? "Sent an attachment" : content;
 
-	// attachments
-	let isGif = gifRegex.test(content);
-	if (message.attachments.size > 0 || isGif) {
-		if (isGif) {
-			content.match(gifRegex).forEach((gifurl, i) => {
-				let gif = newElement("img", {
-					src: `${gifurl}.gif`,
-					className: `gif-${i + 1}`,
-				});
-				if (content.replace(gifRegex, "") !== "" || i !== 0)
-					messageDiv.appendChild(newElement("div", { style: "height:5px;" }));
-				messageDiv.appendChild(gif);
+	// gifs
+	if (gifRegex.test(content)) {
+		content.match(gifRegex).forEach((gifurl, i) => {
+			let gif = newElement("img", {
+				src: `${gifurl}.gif`,
+				className: `gif-${i + 1}`,
 			});
-			content = content.replace(gifRegex, "");
-		}
-
-		if (message.attachments.size > 0) {
-			let attached = Array.from(message.attachments);
-			attached.forEach((attachment) => {
-				let container = document.querySelector(
-					`#messageid-${message.id} .channel-content`
-				);
-			});
-		}
+			if (content.replace(gifRegex, "") !== "" || i !== 0)
+				messageDiv.appendChild(newElement("div", { style: "height:5px;" }));
+			messageDiv.appendChild(gif);
+		});
+		content = content.replace(gifRegex, "");
 	}
+
+	// attachments
+	// if (message.attachments.size > 0) {
+	// 	if (message.attachments.size > 0) {
+	// 		let attached = Array.from(message.attachments);
+	// 		attached.forEach((attachment) => {
+	// 		});
+	// 	}
+	// }
 
 	return content;
 };
