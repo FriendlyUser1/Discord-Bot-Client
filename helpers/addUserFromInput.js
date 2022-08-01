@@ -26,7 +26,7 @@ export const addUserFromInput = () => {
 
 		let id = document.querySelector("#channel-list .channel-add input").value;
 		if (id != "" && parseInt(id) && id.length === 18) {
-			user = client.users
+			client.users
 				.fetch(id)
 				.then((user) => {
 					if (user) {

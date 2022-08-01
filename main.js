@@ -7,11 +7,8 @@ const { app, BrowserWindow, ipcMain, Menu } = require("electron"),
 // config
 app.disableHardwareAcceleration();
 Store.initRenderer();
-ipcMain.handle("getSetting", (event, key) => {
-	return store.get(key, true);
-});
 
-let mainWindow;
+let mainWindow, menuTemplate;
 
 fs.readFile(__dirname + "/token.txt", "utf8", (tokenReadError, token) => {
 	if (tokenReadError && tokenReadError.code !== "ENOENT") throw tokenReadError;
@@ -48,15 +45,18 @@ function mainApp(token) {
 		mainWindow.loadFile(path.join(__dirname, "index.html"));
 
 		mainWindow.on("closed", () => (mainWindow = null));
-
-		const template = [
+		menuTemplate = [
 			{
 				label: "Options",
 				submenu: [
 					{
-						label: "Toggle notifications",
+						label: `Turn notifications ${store.get("notifOn") ? "off" : "on"}`,
 						click() {
 							store.set("notifOn", !store.get("notifOn"));
+							menuTemplate[0].submenu[0].label = `Turn notifications ${
+								store.get("notifOn") ? "off" : "on"
+							}`;
+							Menu.setApplicationMenu(Menu.buildFromTemplate(menuTemplate));
 						},
 					},
 					{
@@ -87,7 +87,7 @@ function mainApp(token) {
 				],
 			},
 		];
-		Menu.setApplicationMenu(Menu.buildFromTemplate(template));
+		Menu.setApplicationMenu(Menu.buildFromTemplate(menuTemplate));
 	}
 
 	ipcMain.on("ready", () => {
@@ -112,3 +112,7 @@ function mainApp(token) {
 		if (mainWindow === null) windowSetup();
 	});
 }
+
+ipcMain.handle("getSetting", (event, key) => {
+	return store.get(key, true);
+});

@@ -169,6 +169,7 @@ addEventListener("load", () => {
 
 						let guild = client.channels.cache.get(id).guild;
 						if (
+							guild &&
 							Array.from(guild.channels.cache)
 								.map((x) => {
 									return x[0];

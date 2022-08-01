@@ -17,7 +17,7 @@ const Discord = require("discord.js"),
 			}
 		}
 	},
-	timestampRegex = /\<t:([\-]?[0-9]+):?([tTdDfFR]?)\>/g,
+	timestampRegex = /\\<t:([\-]?[0-9]+):?([tTdDfFR]?)>/g,
 	mentionRegex = /\\?<(@|@!|@&|#)(\d{17,19})>/gi,
 	emojiRegex = /\\?<(a?):[^\s:]+:([0-9]{19})>/g,
 	gifRegex =
@@ -37,6 +37,7 @@ export const parseMessage = (message, notif) => {
 
 	// timestamp
 	content = content.replace(timestampRegex, (match, unix, option) => {
+		if (match.charAt(0) === "\\") return match.slice(1, message.content.length);
 		let timestamp = "",
 			unixdate = new Date(parseInt(unix) * 1000),
 			shortTime = unixdate.toLocaleTimeString(undefined, {
