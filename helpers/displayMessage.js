@@ -1,9 +1,9 @@
 import { newElement, parseMessage } from "./index.js";
-const { Message } = require("discord.js");
+const Discord = require("discord.js");
 
 /**
  * Creates a message div in the document
- * @param {Message} message
+ * @param {Discord.Message} message
  * @param {Boolean} append
  */
 export const displayMessage = (message, append) => {

@@ -4,7 +4,7 @@ const { TextChannel, Message } = require("discord.js");
 /**
  * Fetch the messages
  * @param {TextChannel} channel Specified channel
- * @param {{limit: number, before: number}} options Options
+ * @param {{limit: number, before?: number}} options Options
  * @returns {Promise<Message[]>} The messages
  */
 const fetchMessages = async (channel, options) => {

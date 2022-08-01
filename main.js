@@ -1,8 +1,15 @@
-const { app, BrowserWindow, ipcMain } = require("electron"),
+const { app, BrowserWindow, ipcMain, Menu } = require("electron"),
 	fs = require("fs"),
-	path = require("path");
+	path = require("path"),
+	Store = require("electron-store"),
+	store = new Store();
 
+// config
 app.disableHardwareAcceleration();
+Store.initRenderer();
+ipcMain.handle("getSetting", (event, key) => {
+	return store.get(key, true);
+});
 
 let mainWindow;
 
@@ -24,7 +31,7 @@ fs.readFile(__dirname + "/token.txt", "utf8", (tokenReadError, token) => {
 });
 
 function mainApp(token) {
-	function createWindow() {
+	function windowSetup() {
 		mainWindow = new BrowserWindow({
 			width: 1030,
 			height: 800,
@@ -41,14 +48,54 @@ function mainApp(token) {
 		mainWindow.loadFile(path.join(__dirname, "index.html"));
 
 		mainWindow.on("closed", () => (mainWindow = null));
+
+		const template = [
+			{
+				label: "Options",
+				submenu: [
+					{
+						label: "Toggle notifications",
+						click() {
+							store.set("notifOn", !store.get("notifOn"));
+						},
+					},
+					{
+						label: "Quit",
+						click() {
+							app.quit();
+						},
+					},
+				],
+			},
+			{
+				label: "Advanced options",
+				submenu: [
+					{
+						label: "Open Devtools",
+						accelerator: "CmdOrCtrl+Shift+I",
+						click() {
+							mainWindow.openDevTools();
+						},
+					},
+					{
+						label: "Reload",
+						accelerator: "CmdOrCtrl+R",
+						click() {
+							mainWindow.reload();
+						},
+					},
+				],
+			},
+		];
+		Menu.setApplicationMenu(Menu.buildFromTemplate(template));
 	}
 
 	ipcMain.on("ready", () => {
 		mainWindow.webContents.send("token", token);
 	});
 
-	if (app.isReady()) createWindow();
-	app.on("ready", createWindow);
+	if (app.isReady()) windowSetup();
+	app.on("ready", windowSetup);
 
 	// Quit when all windows are closed.
 	app.on("window-all-closed", () => {
@@ -62,6 +109,6 @@ function mainApp(token) {
 	app.on("activate", () => {
 		// On OS X it's common to re-create a window in the app when the
 		// dock icon is clicked and there are no other windows open.
-		if (mainWindow === null) createWindow();
+		if (mainWindow === null) windowSetup();
 	});
 }

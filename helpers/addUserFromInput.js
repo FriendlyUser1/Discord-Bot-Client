@@ -1,4 +1,18 @@
+import { client } from "../index.js";
+import { displayChannel } from "./index.js";
+
+/**
+ * Adds a user's dm
+ */
 export const addUserFromInput = () => {
+	const newDM = (id) => {
+		return new Promise(async (success, fail) => {
+			let user = client.users.cache.get(String(id));
+			if (user) user.createDM().then(success).catch(fail);
+			else fail("User Not Found");
+		});
+	};
+
 	if (document.querySelector("#channel-list .channel-add input").value) {
 		if (
 			document
@@ -18,9 +32,9 @@ export const addUserFromInput = () => {
 					if (user) {
 						newDM(user.id)
 							.then((c) => {
-								if (!openDMs.includes(c)) openDMs.push(c);
+								if (!global.openDMs.includes(c)) global.openDMs.push(c);
 
-								openDMs.forEach((channel) => {
+								global.openDMs.forEach((channel) => {
 									if (!document.querySelector(`.channelid-${c.id}`))
 										displayChannel(channel);
 								});

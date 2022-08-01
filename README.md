@@ -18,7 +18,7 @@ This application is very unfinished, and is not close to being complete - curren
 
 ### Immediate To-Do List
 
-- Option to disable notifications
+- Handle more events (channel delete etc)
 - Ability to view all attachments
 - Ability to edit/delete messages
 
