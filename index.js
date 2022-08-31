@@ -22,12 +22,12 @@ Object.assign(global, {
 	notifChannels: [],
 	Channel: {},
 	Guild: {},
+	windowActive: document.hidden,
 });
 
 addEventListener("load", () => {
-	let windowActive = document.hidden;
-	addEventListener("focus", () => (windowActive = true));
-	addEventListener("blur", () => (windowActive = false));
+	addEventListener("focus", () => (global.windowActive = true));
+	addEventListener("blur", () => (global.windowActive = false));
 
 	ipcRenderer.on("token", (event, arg) => {
 		client.on("ready", start);

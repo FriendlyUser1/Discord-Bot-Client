@@ -11,7 +11,7 @@ const { ipcRenderer } = require("electron"),
 	Discord = require("discord.js");
 
 /**
- * Client's message event called for any messages in its monitored channels
+ * Client's message event called for all new messages in its monitored channels
  * @param {Discord.Message} message
  * @returns
  */
@@ -76,7 +76,7 @@ export const messageCreate = async (message) => {
 			global.notifChannels.push(channelID);
 
 		// TODO COMMENT
-		if (!activeChannel || !document.hidden) {
+		if (!activeChannel || !global.windowActive) {
 			if (!activeChannel && global.Guild === message.guild) {
 				let classes = document.getElementById(
 					`channelid-${message.channel.id}`
