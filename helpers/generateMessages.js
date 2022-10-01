@@ -25,18 +25,10 @@ export const generateMessages = async (channel) => {
 		async (messages) => {
 			messages = Array.from(messages.values());
 
-			if (messages.length > 0) {
-				if (global.Before != 0) global.loadedMore++;
-				global.Before = parseInt(messages[messages.length - 1].id);
-				global.After = messages[0].id;
-
+			if (global.loadedMore === 0) {
 				document
 					.querySelector("#channel-open .channel-openinner")
 					.setAttribute("id", `openid-${channel.id}`);
-
-				messages.forEach((msg) => {
-					displayMessage(msg, false);
-				});
 
 				document.getElementById(`openid-${channel.id}`).append(
 					newElement("span", {
@@ -44,6 +36,16 @@ export const generateMessages = async (channel) => {
 						id: "scroll-el",
 					})
 				);
+			}
+
+			if (messages.length > 0) {
+				if (global.Before != 0) global.loadedMore++;
+				global.Before = parseInt(messages[messages.length - 1].id);
+				global.After = messages[0].id;
+
+				messages.forEach((msg) => {
+					displayMessage(msg, false);
+				});
 
 				if (global.After != 0 && global.loadedMore === 0) {
 					global.freezeClick = true;

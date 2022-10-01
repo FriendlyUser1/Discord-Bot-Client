@@ -6,7 +6,7 @@ import {
 	generateMessages,
 	readChannel,
 } from "./helpers/index.js";
-import { messageCreate } from "./events/message.js";
+import { messageCreate } from "./events/index.js";
 const { ipcRenderer } = require("electron"),
 	Discord = require("discord.js"),
 	_ = require("lodash");
@@ -36,7 +36,7 @@ addEventListener("load", () => {
 	ipcRenderer.send("ready");
 
 	const start = () => {
-		console.log("ready");
+		// console.log("ready"); // debug
 
 		let serverList = client.guilds.cache;
 
@@ -128,9 +128,7 @@ addEventListener("load", () => {
 		document
 			.querySelector("#channel-list .channel-existing")
 			.addEventListener("click", (e) => {
-				if (freezeClick) {
-					return;
-				}
+				if (freezeClick) return;
 
 				if (
 					e.target.hasAttribute("class") &&

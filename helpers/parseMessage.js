@@ -17,7 +17,7 @@ const Discord = require("discord.js"),
 			}
 		}
 	},
-	timestampRegex = /\\<t:([\-]?[0-9]+):?([tTdDfFR]?)>/g,
+	timestampRegex = /\\?<t:([\-]?[0-9]+):?([tTdDfFR]?)>/g,
 	mentionRegex = /\\?<(@|@!|@&|#)(\d{17,19})>/gi,
 	emojiRegex = /\\?<(a?):[^\s:]+:([0-9]{19})>/g,
 	gifRegex =
@@ -132,7 +132,7 @@ export const parseMessage = (message, notif) => {
 			newElement("img", {
 				src: `https://cdn.discordapp.com/emojis/${emojiID}.${
 					ani !== "" ? "gif" : "png"
-				}?v=1`,
+				}?v=1&size=80&quality=lossless`,
 				className: `emoji emoji-${emojiID}`,
 			})
 		);
@@ -146,10 +146,11 @@ export const parseMessage = (message, notif) => {
 	if (gifRegex.test(content)) {
 		content.match(gifRegex).forEach((gifurl, i) => {
 			let gif = newElement("img", {
-				src: `${gifurl}.gif`,
-				className: `gif-${i + 1}`,
+				src: gifurl.endsWith(".gif") ? gifurl : `${gifurl}.gif`,
+				className: `gif gif-${i + 1}`,
+				alt: `${gifurl}`,
 			});
-			if (content.replace(gifRegex, "") !== "" || i !== 0)
+			if (content.replace(gifRegex, "").trim() !== "" || i > 0)
 				messageDiv.appendChild(newElement("div", { style: "height:5px;" }));
 			messageDiv.appendChild(gif);
 		});
@@ -157,13 +158,23 @@ export const parseMessage = (message, notif) => {
 	}
 
 	// attachments
-	// if (message.attachments.size > 0) {
-	// 	if (message.attachments.size > 0) {
-	// 		let attached = Array.from(message.attachments);
-	// 		attached.forEach((attachment) => {
-	// 		});
-	// 	}
-	// }
+	if (message.attachments.size > 0) {
+		let attached = Array.from(message.attachments);
+		attached.forEach((attachment, i) => {
+			let attach = attachment[1];
+			if (attach.width || attach.height) {
+				if (message.content.trim() !== "" || i > 0)
+					messageDiv.appendChild(newElement("div", { style: "height:5px;" }));
+
+				messageDiv.appendChild(
+					newElement("img", {
+						src: attach.url,
+						className: `image image-${attach.id}`,
+					})
+				);
+			}
+		});
+	}
 
 	return content;
 };

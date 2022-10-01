@@ -14,24 +14,26 @@ This application is very unfinished, and is not close to being complete - curren
 
 ### Recent features
 
-- Infinite scrolling!
+- Infinite scrolling
+- Images, gifs and emojis
 
 ### Immediate To-Do List
 
 - Handle more events (channel delete etc)
-- Ability to view all attachments
+- Ability to view all types of attachments
 - Ability to edit/delete messages
 
 ### Known issues
 
-- With mentions, timestamps and emojis the other text is not correctly placed around it
+- With mentions, timestamps and emojis the other text is not correctly placed around it (always at end) (fixing soon)
+- Warnings in console for gifs (cannot fix)
 
 ## Installation
 
-You will need to install [Node.JS] and make a [bot] will all [intents] in the developer dashboard selected for the program to run
+You will need to install [Node.JS] and have a [bot] (with all [intents] in the developer dashboard selected) for the program to run
 
 1. Download zip [here] and extract it into a folder
-2. Create a text file called `token.txt` in the folder and type your bot's token in it
+2. Create a text file called `token.txt` in the folder and paste your bot's token in it (you get the token when creating your bot)
 3. Run `start.bat` to compile and run the program
 
 ## Usage

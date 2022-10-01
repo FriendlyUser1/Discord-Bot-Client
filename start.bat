@@ -1,3 +1,3 @@
 @echo off
-start /min npm i 
-start /min npm start
+call npm install
+start /B npm start

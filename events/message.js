@@ -13,19 +13,19 @@ const { ipcRenderer } = require("electron"),
 /**
  * Client's message event called for all new messages in its monitored channels
  * @param {Discord.Message} message
- * @returns
  */
 export const messageCreate = async (message) => {
+	// console.log(message); // debug
+
 	let channelID = message.channel.id;
 
-	// If the server exists (not DM) and isn't already in the server list, display it
+	// If in guild and guild isn't already in the server list, display it
 	if (
 		message.guild &&
 		!document.querySelector(`.server-existing #serverid-${message.guild.id}`)
 	)
 		displayServer(message.guild);
 
-	// If the message happened in the selected channel / guild
 	let activeChannel =
 			document
 				.querySelector("#channel-open .channel-openinner")
@@ -41,6 +41,7 @@ export const messageCreate = async (message) => {
 				.querySelector(`.server-existing #serverid-${message.guild.id} img`)
 				.hasAttribute("selected");
 
+	// If the message happened in the selected channel
 	if (activeChannel) {
 		displayMessage(message, true);
 		global.After = parseInt(message.id);
@@ -49,10 +50,11 @@ export const messageCreate = async (message) => {
 			.getElementById("scroll-el")
 			.scrollIntoView({ behaviour: "smooth", block: "end" });
 	} else if (
+		// If the channel is in the guild but isn't in the channel list
 		!document.getElementById(`channelid-${channelID}`) &&
 		global.Guild === message.guild
 	)
-		displayChannel(message.channel);
+		displayChannel(message.channel); // display it
 
 	// If message is in a different guild that isn't already highlighted...
 	if (
@@ -87,6 +89,7 @@ export const messageCreate = async (message) => {
 			}
 
 			const notifOn = await ipcRenderer.invoke("getSetting", "notifOn");
+
 			if (!notifOn) return;
 
 			let notif;

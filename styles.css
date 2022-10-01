@@ -61,22 +61,26 @@ body {
 	width: 35px;
 	height: 35px;
 }
+
 .dm-icon {
 	display: block;
 	width: 28px !important;
 	height: 20px !important;
 }
+
 .server-item {
 	position: relative;
 	text-align: center;
 	color: white;
 }
+
 .server-item:hover > .server-icon {
 	cursor: pointer;
 	transition: border-radius 100ms;
 	box-shadow: 0px 0px 0px 2px #fff;
 	border-radius: 40%;
 }
+
 .server-imgtext {
 	margin-top: 3px;
 	position: absolute;
@@ -85,19 +89,23 @@ body {
 	transform: translate(-50%, -50%);
 	cursor: pointer;
 }
+
 .server-icon {
 	border-radius: 100%;
 	width: 40px;
 	height: 40px;
 	margin-top: 6px;
 }
+
 .server-item [selected] {
 	box-shadow: 0px 0px 0px 2px #fff;
 	border-radius: 40%;
 }
+
 .server-item [servernotif] {
 	box-shadow: 0px 0px 0px 2px #fcc;
 }
+
 #server-list {
 	height: 100%;
 	width: 57px;
@@ -107,6 +115,7 @@ body {
 	overflow-y: scroll;
 	background-color: var(--background-tertiary);
 }
+
 #channel-list {
 	color: var(--channels-default);
 	width: 192px;
@@ -115,6 +124,7 @@ body {
 	overflow-y: scroll;
 	background-color: var(--background-secondary);
 }
+
 #channel-list .channel-item {
 	word-wrap: break-word;
 	white-space: nowrap;
@@ -129,51 +139,63 @@ body {
 	margin-right: 4px;
 	cursor: pointer;
 }
+
 #channel-list .channel-item[selected] {
 	background-color: var(--background-modifier-selected);
 }
+
 #channel-list .channel-item:hover:not([selected]) {
 	background-color: var(--background-modifier-hover);
 }
+
 #channel-list .channel-item .channel-title {
 	font-size: 100% !important;
 	font-family: Whitney, sans-serif;
 	line-height: 16px !important;
 }
+
 #channel-list::-webkit-scrollbar,
 #server-list::-webkit-scrollbar {
 	display: none;
 }
+
 .error {
 	border: 1px solid red !important;
 }
+
 #channel-list .channel-add {
 	padding-bottom: 15px;
 	display: flex;
 }
+
 #channel-list .channel-add input {
 	width: 100%;
 	background-color: #23272a;
 	padding: 4px 6px;
 	border-bottom: 1px solid #000;
 }
+
 #channel-list .channel-add button {
 	border: 0.5px solid #000;
 	outline: 0;
 	background-color: var(--background-tertiary);
 	color: #fff;
 }
+
 #channel-list .channel-add button:hover {
 	transition: background-color 0.2s;
 	background-color: var(--background-secondary-alt);
 	color: #fff;
 }
+
 #channel-list .channel-add button:active {
 	background-color: var(--background-primary);
 }
+
 .channel-newmessage {
 	color: var(--interactive-active);
 }
+
 #channel-open {
 	height: 100%;
 	flex-grow: 1;
@@ -182,41 +204,51 @@ body {
 	overflow: hidden;
 	background-color: var(--background-primary);
 }
+
 #channel-open .channel-openinner {
 	flex-grow: 1;
 	overflow-y: scroll;
 	overflow-x: hidden;
 }
+
 .channel-openinner::-webkit-scrollbar {
 	width: 16px;
 	height: 16px;
 }
+
 .channel-openinner::-webkit-scrollbar-corner {
 	background-color: transparent;
 }
+
 .channel-openinner::-webkit-scrollbar-thumb {
 	background-color: var(--scrollbar-auto-thumb) !important;
 	min-height: 40px;
 }
+
 .channel-openinner::-webkit-scrollbar-thumb,
 .channel-openinner::-webkit-scrollbar-track {
 	border: 4px solid transparent;
 	background-clip: padding-box;
 	border-radius: 8px;
 }
+
 .channel-openinner::-webkit-scrollbar-track {
 	background-color: var(--scrollbar-auto-track);
 }
+
 #channel-open .channel-textboxcontain input {
 	width: 100%;
 }
+
 .channel-message {
 	margin-top: 1.0625rem;
 	min-height: 2.75rem;
 }
+
 .channel-text {
 	margin-left: 5px;
 }
+
 .channel-dm {
 	font-size: 14px;
 }
@@ -232,9 +264,11 @@ body {
 	margin-left: 40px;
 	cursor: pointer;
 }
+
 #channel-open .channel-openinner .username::after {
 	content: "\a";
 }
+
 .date {
 	cursor: default;
 	color: var(--text-muted);
@@ -242,21 +276,25 @@ body {
 	line-height: 1.375rem;
 	font-weight: normal;
 }
+
 div.channel-text {
 	margin-top: -40px;
 }
+
 #channel-open .channel-openinner .channel-content {
 	margin-left: 40px;
 	font-size: 1rem;
 	overflow-wrap: anywhere;
 	display: inline-block;
 }
+
 .timestamp {
 	background-color: var(--background-modifier-accent);
 	margin-left: 3px;
 	padding: 1px 2px;
 	border-radius: 2px;
 }
+
 .mention {
 	background-color: hsla(235, calc(0.6 * 85.6%), 64.7%, 0.3);
 	color: hsl(236, calc(0.6 * 83.3%), 92.9%);
@@ -264,15 +302,34 @@ div.channel-text {
 	padding: 1px 2px;
 	border-radius: 2px;
 }
+
 .emoji {
 	display: inline;
 	max-width: 48px;
 	margin-left: 3px;
 }
+
+.gif {
+	display: inline;
+	max-width: 400px;
+	max-height: 400px;
+	width: auto;
+	height: auto;
+}
+
+.image {
+	display: inline;
+	max-width: 400px;
+	max-height: 400px;
+	width: auto;
+	height: auto;
+}
+
 #channel-open .channel-textboxcontain {
 	display: flex;
 	justify-content: center;
 }
+
 #channel-open .channel-textboxcontain .textbox {
 	color: #fff;
 	background-color: var(--background-accent);
@@ -281,17 +338,20 @@ div.channel-text {
 	padding: 8px 12px;
 	flex-grow: 1;
 }
+
 .channel-guildtopname {
 	padding: 2vh;
 	border-bottom: 2px solid #fff;
 	position: sticky;
 }
+
 textarea,
 select,
 input,
 button {
 	outline: 0;
 }
+
 input {
 	color: #fff;
 	border: none;
