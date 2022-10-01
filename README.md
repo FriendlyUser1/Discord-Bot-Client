@@ -6,11 +6,12 @@ Discord's client is great, but doesn't allow you to control a bot account.
 
 ### What this will let you do
 
-With this application, you will be able to fully control your bot as a user, like sending and viewing messages from guilds your bot is in or sending DMs.
+With this application, you will be able to fully control your bot as a user, like sending and viewing messages from guilds your bot is in and sending DMs.
 
 ### Disclaimer
 
-This application is very unfinished, and is not close to being complete - currently more of a proof of concept. I will keep working on this with more improvements and features to try to let this application run as close to the native Discord client as I can get.
+This application is still pretty unfinished, and is not very close to being complete. 
+I am actively working on this to add as many features as possible.
 
 ### Recent features
 
