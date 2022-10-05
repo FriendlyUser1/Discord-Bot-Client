@@ -10,8 +10,8 @@ With this application, you will be able to fully control your bot as a user, lik
 
 ### Disclaimer
 
-This application is still pretty unfinished, and is not very close to being complete. 
-I am actively working on this to add as many features as possible.
+- This application is still pretty unfinished but I am actively working to add as many features as possible.
+- I cannot get your bot's token from you putting it into this program. Look at the source if you don't believe me. 
 
 ### Recent features
 
