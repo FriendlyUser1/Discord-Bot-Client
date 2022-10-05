@@ -77,7 +77,7 @@ export const messageCreate = async (message) => {
 			// Highlight it!
 			global.notifChannels.push(channelID);
 
-		// TODO COMMENT
+		// If message is in an unselected channel
 		if (!activeChannel || !global.windowActive) {
 			if (!activeChannel && global.Guild === message.guild) {
 				let classes = document.getElementById(
@@ -93,6 +93,8 @@ export const messageCreate = async (message) => {
 			if (!notifOn) return;
 
 			let notif;
+
+			// Create notification
 			if (message.guild && !activeChannel) {
 				let messageMember = message.guild.member(message.author);
 
@@ -162,10 +164,12 @@ export const messageCreate = async (message) => {
 					}
 
 					readChannel(global.Channel.id).catch(console.error);
+
 					global.notifChannels = global.notifChannels.splice(
 						global.notifChannels.indexOf(global.Channel.id),
 						1
 					);
+
 					Array.from(
 						document.getElementsByClassName("channel-newmessage")
 					).forEach((e) => {
@@ -177,7 +181,9 @@ export const messageCreate = async (message) => {
 							);
 						}
 					});
+
 					let guild = client.channels.cache.get(global.Channel.id).guild;
+
 					if (
 						Array.from(guild.channels.cache)
 							.map((x) => {
