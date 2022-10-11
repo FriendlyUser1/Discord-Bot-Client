@@ -49,4 +49,4 @@ Type your message in the text box at the bottom, then press "enter"
 [here]: https://github.com/FriendlyUser1/discord-bot-client/archive/refs/heads/main.zip
 [node.js]: https://nodejs.org/en/
 [user id]: https://support.discord.com/hc/en-us/articles/206346498-Where-can-I-find-my-User-Server-Message-ID-
-[intents]: https://i.imgur.com/y7RNoCP.png
+[intents]: https://i.imgur.com/eR9FMqp.png
