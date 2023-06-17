@@ -116,9 +116,7 @@ addEventListener("load", () => {
 					global.Guild = client.guilds.cache.get(id);
 
 					client.channels.cache
-						.filter(
-							(c) => ["text", "news"].includes(c.type) && c.guild.id === id
-						)
+						.filter((c) => c.guild.id === id)
 						.forEach((c) => {
 							displayChannel(c);
 						});
