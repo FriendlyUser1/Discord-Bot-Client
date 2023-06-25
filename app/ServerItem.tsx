@@ -1,10 +1,11 @@
 import { APIGuild } from "discord-api-types/v10";
 import Image from "next/image";
 import styles from "./server.module.css";
+import "cooltipz-css";
 
 interface dmGuild {
 	name: string;
-	icon: string;
+	icon: string | null;
 	id: string;
 }
 
@@ -21,8 +22,12 @@ export default function ServerItem({
 		.join("");
 
 	return (
-		<li className={styles.server}>
-			{server.name === "dm" || !server.icon ? (
+		<li
+			className={styles.server}
+			aria-label={server.name}
+			data-cooltipz-dir="right"
+		>
+			{server.id === "@me" || !server.icon ? (
 				<svg
 					width="48"
 					height="48"
@@ -41,7 +46,7 @@ export default function ServerItem({
 					width={48}
 				/>
 			)}
-			{server.name === "dm" && (
+			{server.id === "@me" && (
 				<svg
 					className={styles.dmIcon}
 					role="img"

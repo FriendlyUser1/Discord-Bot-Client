@@ -15,6 +15,9 @@
 	margin-bottom: 8px;
 	cursor: pointer;
 	position: relative;
+	--cooltipz-bg-color: #111214;
+	--cooltipz-slide: 0;
+	--cooltipz-border-radius: 0.2rem;
 }
 
 .server > * {

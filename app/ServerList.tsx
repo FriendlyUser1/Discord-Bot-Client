@@ -23,7 +23,7 @@ export default async function ServerList({
 		<nav className={styles.serverList}>
 			<ul>
 				<ServerItem
-					server={{ name: "dm", icon: "defaultIcon", id: "@me" }}
+					server={{ name: "DMs", icon: "defaultIcon", id: "@me" }}
 					selected={selected}
 				/>
 				{servers.map((server) => (
