@@ -1,0 +1,69 @@
+.serverList {
+	width: 72px;
+	display: flex;
+	flex-direction: column;
+	align-items: center;
+	justify-content: flex-start;
+	background-color: var(--background-tertiary);
+	padding: 12px;
+}
+
+.server {
+	display: grid;
+	justify-items: center;
+	align-items: center;
+	margin-bottom: 8px;
+	cursor: pointer;
+	position: relative;
+}
+
+.server > * {
+	grid-column-start: 1;
+	grid-row-start: 1;
+}
+
+.server,
+.server :not(.dmIcon):not(.selected) {
+	border-radius: 50%;
+	user-select: none;
+}
+
+.server:hover :not(.dmIcon) {
+	border-radius: 34%;
+}
+
+.server img,
+.server svg {
+	transition: 100ms linear;
+}
+
+.serverAcronym,
+.dmIcon {
+	pointer-events: none;
+	user-select: none;
+}
+
+.serverAcronym {
+	font-weight: 500;
+	line-height: 1.2em;
+	white-space: nowrap;
+	text-rendering: optimizeLegibility;
+	color: var(--text-normal);
+}
+
+.dmIcon {
+	color: #fff;
+}
+
+.defaultIcon {
+	color: var(--background-primary);
+}
+
+.defaultIcon:hover {
+	color: var(--blurple);
+}
+
+.selected {
+	color: var(--blurple);
+	border-radius: 34%;
+}

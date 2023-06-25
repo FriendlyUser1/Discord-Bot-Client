@@ -1,23 +1,33 @@
 {
 	"name": "discord-bot-client",
 	"version": "1.0.0",
-	"description": "Discord client for bots",
+	"description": "Discord web client for bots",
 	"bugs": {
 		"url": "https://github.com/FriendlyUser1/discord-bot-client/issues"
 	},
-	"license": "MIT",
+	"license": "GPL 3.0",
 	"author": {
 		"name": "FriendlyUser1",
 		"email": "ciirodev335@gmail.com"
 	},
-	"main": "main.js",
 	"scripts": {
-		"start": "electron ."
+		"dev": "next dev",
+		"build": "next build",
+		"start": "next start",
+		"lint": "next lint"
 	},
 	"dependencies": {
-		"discord.js": "^12.5.3",
-		"electron": "^19.0.10",
-		"electron-store": "^8.1.0",
-		"lodash": "^4.17.21"
+		"eslint": "8.43.0",
+		"eslint-config-next": "13.4.6",
+		"next": "13.4.6",
+		"react": "18.2.0",
+		"react-dom": "18.2.0"
+	},
+	"devDependencies": {
+		"@types/node": "^20.3.1",
+		"@types/react": "^18.2.13",
+		"@types/react-dom": "^18.2.6",
+		"discord-api-types": "^0.37.46",
+		"typescript": "^5.1.3"
 	}
 }
