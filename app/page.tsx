@@ -8,7 +8,7 @@ export const metadata: Metadata = {
 export default function Page() {
 	return (
 		<div className="app-container">
-			<ServerList selected={"1015647339337236632"} />
+			<ServerList selected={"@me"} />
 		</div>
 	);
 }
