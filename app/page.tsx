@@ -1,14 +1,5 @@
-import ServerList from "./ServerList";
-import { Metadata } from "next";
-
-export const metadata: Metadata = {
-	title: "Discord Bot Client",
-};
+import { redirect } from "next/navigation";
 
 export default function Page() {
-	return (
-		<div className="app-container">
-			<ServerList selected={null} />
-		</div>
-	);
+	redirect("/me");
 }

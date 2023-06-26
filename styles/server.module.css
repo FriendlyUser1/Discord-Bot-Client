@@ -6,6 +6,7 @@
 	justify-content: flex-start;
 	background-color: var(--background-tertiary);
 	padding: 12px;
+	overflow-y: scroll;
 }
 
 .server {
@@ -15,9 +16,6 @@
 	margin-bottom: 8px;
 	cursor: pointer;
 	position: relative;
-	--cooltipz-bg-color: #111214;
-	--cooltipz-slide: 0;
-	--cooltipz-border-radius: 0.2rem;
 }
 
 .server > * {
@@ -69,4 +67,19 @@
 .selected {
 	color: var(--blurple);
 	border-radius: 34%;
+}
+
+.guildSeparator {
+	height: 2px;
+	width: 32px;
+	border-radius: 1px;
+	background-color: rgba(78, 80, 88, 0.48);
+}
+
+.listItem {
+	display: grid;
+	justify-items: center;
+	align-items: center;
+	margin-bottom: 8px;
+	position: relative;
 }

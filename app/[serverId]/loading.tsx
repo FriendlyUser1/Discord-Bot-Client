@@ -1,5 +1,5 @@
-import ServerItem from "./ServerItem";
-import serverStyles from "./server.module.css";
+import ServerItem from "@/components/ServerItem";
+import serverStyles from "@/styles/server.module.css";
 
 export default function Loading() {
 	let servers = [];

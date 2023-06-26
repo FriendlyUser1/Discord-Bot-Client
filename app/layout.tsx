@@ -1,4 +1,9 @@
-import "./style.css";
+import "@/styles/style.css";
+import { Metadata } from "next";
+
+export const metadata: Metadata = {
+	title: "Discord Bot Client",
+};
 
 export default function RootLayout({
 	children,
