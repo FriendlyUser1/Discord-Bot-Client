@@ -1,4 +1,4 @@
-# Discord Bot Client (web version)
+# Discord Bot Client (web)
 
 Discord's client is great, but doesn't allow you to control a bot account.
 
@@ -6,11 +6,11 @@ Discord's client is great, but doesn't allow you to control a bot account.
 
 ### What this will let you do
 
-With this application, you will be able to fully control your bot as a user, like sending and viewing messages in servers or DMs.
+With this application, you will be able to fully control your bot as a user, sending and viewing messages in servers or DMs.
 
 ### Disclaimer
 
-- This application is still being developed, expect bugs.
+- This version of the client is still in early development.
 - I cannot get your bot's token from you putting it into this program.
 
 ### Recent features
@@ -19,7 +19,7 @@ With this application, you will be able to fully control your bot as a user, lik
 
 ### Immediate To-Do List
 
-(wip)
+- Create the basic UI
 
 ### Known issues
 
