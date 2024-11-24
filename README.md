@@ -2,6 +2,11 @@
 
 Discord's client is great, but doesn't allow you to control a bot account.
 
+## Archived
+
+This is old, probably doesn't work, plus writing it in vanilla js was a mistake.
+I may rewrite this in the future, or you can fork it.
+
 ## About
 
 ### What this will let you do
